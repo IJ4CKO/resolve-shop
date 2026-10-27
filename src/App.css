@@ -1,0 +1,67 @@
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+}
+
+.product-card {
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--secondary-colour);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  background: var(--text-colour);
+  color: white;
+  padding: 20px 40px;
+}
+
+/*In CSS, .name styles elements with that class, and name with no dot styles every element of that type.
+ The JSX needs a matching className for the dotted version*/
+button {
+  background: var(--accent-colour);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.hero {
+  padding: 30px 20px 20px;
+}
+
+.hero h2 {
+  font-size: 65px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  margin: 0 0 16px;
+  font-weight: 800;
+}
+
+.hero p {
+  color: var(--text-colour);
+  font-size: 25px;
+  margin: 0;
+}
+
+.navbar {
+  color: white;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px
+}
+
+.product-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  border-radius: 8px;
+}
