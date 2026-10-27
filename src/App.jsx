@@ -4,16 +4,16 @@ import { Routes, Route, Link } from "react-router-dom";
 import About from "./About.jsx";
 
 const products = [
-  { id: 1, name: "T-Shirt", colour:"White", price: 20, image: "/T-shirt/tshirt-white.png" },
-  { id: 2, name: "T-shirt", colour:"Grey", price: 20, image: "/T-shirt/tshirt-grey.png"},
-  { id: 3, name: "T-shirt", colour:"Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png"},
-  { id: 4, name: "Hoodie", colour:"Grey", price: 40, image: "/Hoodie/hoodie-grey.png"},
-  { id: 5, name: "Hoodie", colour:"Black", price: 40, image: "/Hoodie/hoodie-black.png"},
-  { id: 6, name: "Hoodie", colour:"Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png"},
-  { id: 7, name: "Hoodie", colour:"White", price: 40, image: "/Hoodie/hoodie-white.png"},
-  { id: 8, name: "Jeans", colour:"Blue", price: 45, image: "/Jeans/Jeans-blue.png"},
-  { id: 9, name: "Jeans", colour:"Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png"},
-  { id: 10, name: "Jeans", colour:"Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png"}
+  { id: 1, name: "T-Shirt", category: "T-Shirts", colour:"White", price: 20, image: "/T-shirt/tshirt-white.png" },
+  { id: 2, name: "T-shirt", category: "T-Shirts", colour:"Grey", price: 20, image: "/T-shirt/tshirt-grey.png"},
+  { id: 3, name: "T-shirt", category: "T-Shirts", colour:"Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png"},
+  { id: 4, name: "Hoodie", category: "Hoodies",colour:"Grey",  price: 40, image: "/Hoodie/hoodie-grey.png"},
+  { id: 5, name: "Hoodie", category: "Hoodies", colour:"Black", price: 40, image: "/Hoodie/hoodie-black.png"},
+  { id: 6, name: "Hoodie", category: "Hoodies", colour:"Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png"},
+  { id: 7, name: "Hoodie", category: "Hoodies", colour:"White", price: 40, image: "/Hoodie/hoodie-white.png"},
+  { id: 8, name: "Jeans", category: "Jeans", colour:"Blue", price: 45, image: "/Jeans/Jeans-blue.png"},
+  { id: 9, name: "Jeans", category: "Jeans", colour:"Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png"},
+  { id: 10, name: "Jeans", category: "Jeans", colour:"Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png"}
 
 ];
 
@@ -90,18 +90,24 @@ function App() {
     }
   }
 
+  // All means no filter has been applied yet
+  const [category, setCategory] = useState("All");
+
+  const shownProducts =
+    category === "All" ? products : products.filter((product) => product.category === category);
+
   return (
     <div>
       <nav className="navbar">
         <div className="nav-links">
-        <Link to="/">Shop</Link>
+        <Link to="/" onClick={() => setCategory("Home")}>Home</Link>
         <Link to="/about">About</Link>
         <div className="clothing-dropdown">
           <span>Products</span>
           <div className="clothing-dropdown-menu">
-            <button>T-Shirts</button>
-            <button>Hoodies</button>
-            <button>Jeans</button>
+            <button onClick={() => setCategory("T-Shirts")}>T-Shirts</button>
+            <button onClick={() => setCategory("Hoodies")}>Hoodies</button>
+            <button onClick={() => setCategory("Jeans")}>Jeans</button>
           </div>
         </div>
         </div>
@@ -120,10 +126,12 @@ function App() {
         <p>Everyday comfort, effortless style.</p>
       </section>
 
+      <img className="look-book" src="/Lookbook/lookbook.webp" alt="RESOLVE collection" />
+
       <ul className="product-grid">
         {/* .map() repeats what is inside it for each product. 
           key gives each item a unique label so React can tell them apart*/}
-      {products.map((product) => (
+      {shownProducts.map((product) => (
         <li key={product.id}>
           {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
           <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image}/>

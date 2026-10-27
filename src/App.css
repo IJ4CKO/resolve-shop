@@ -20,6 +20,12 @@
   padding: 20px 40px;
 }
 
+.navbar a {
+  color: white;
+  text-decoration: none;
+}
+
+
 /*In CSS, .name styles elements with that class, and name with no dot styles every element of that type.
  The JSX needs a matching className for the dotted version*/
 button {
@@ -80,4 +86,10 @@ button {
 
 .clothing-dropdown:hover .clothing-dropdown-menu {
   display: block;
+}
+
+.look-book {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
 }
