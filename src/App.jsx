@@ -9,10 +9,11 @@ const products = [
   { id: 3, name: "T-shirt", colour:"Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png"},
   { id: 4, name: "Hoodie", colour:"Grey", price: 40, image: "/Hoodie/hoodie-grey.png"},
   { id: 5, name: "Hoodie", colour:"Black", price: 40, image: "/Hoodie/hoodie-black.png"},
-  { id: 6, name: "Hoodie", colour:"White", price: 40, image: "/Hoodie/hoodie-white.png"},
-  { id: 7, name: "Jeans", colour:"Blue", price: 45, image: "/Jeans/Jeans-blue.png"},
-  { id: 8, name: "Jeans", colour:"Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png"},
-  { id: 9, name: "Jeans", colour:"Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png"}
+  { id: 6, name: "Hoodie", colour:"Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png"},
+  { id: 7, name: "Hoodie", colour:"White", price: 40, image: "/Hoodie/hoodie-white.png"},
+  { id: 8, name: "Jeans", colour:"Blue", price: 45, image: "/Jeans/Jeans-blue.png"},
+  { id: 9, name: "Jeans", colour:"Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png"},
+  { id: 10, name: "Jeans", colour:"Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png"}
 
 ];
 
@@ -95,6 +96,14 @@ function App() {
         <div className="nav-links">
         <Link to="/">Shop</Link>
         <Link to="/about">About</Link>
+        <div className="clothing-dropdown">
+          <span>Products</span>
+          <div className="clothing-dropdown-menu">
+            <button>T-Shirts</button>
+            <button>Hoodies</button>
+            <button>Jeans</button>
+          </div>
+        </div>
         </div>
         <span>RESOLVE</span>
         <span>Basket: £{totalPrice}</span>

@@ -65,3 +65,19 @@ button {
   object-fit: contain;
   border-radius: 8px;
 }
+
+.clothing-dropdown {
+  position: relative;
+}
+
+.clothing-dropdown-menu {
+  display: none; /*hides the menu*/
+  position: absolute; /* Relative on the parent, absolute on the menu, makes it float under the word and not push things down*/
+  top: 100%;
+  background: var(--text-colour);
+  padding: 12px;
+}
+
+.clothing-dropdown:hover .clothing-dropdown-menu {
+  display: block;
+}
