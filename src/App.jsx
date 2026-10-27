@@ -2,18 +2,19 @@ import { useState } from "react";
 import "./App.css";
 import { Routes, Route, Link } from "react-router-dom";
 import About from "./About.jsx";
+import Basket from "./Basket.jsx";
 
 const products = [
-  { id: 1, name: "T-Shirt", category: "T-Shirts", colour:"White", price: 20, image: "/T-shirt/tshirt-white.png" },
-  { id: 2, name: "T-shirt", category: "T-Shirts", colour:"Grey", price: 20, image: "/T-shirt/tshirt-grey.png"},
-  { id: 3, name: "T-shirt", category: "T-Shirts", colour:"Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png"},
-  { id: 4, name: "Hoodie", category: "Hoodies",colour:"Grey",  price: 40, image: "/Hoodie/hoodie-grey.png"},
-  { id: 5, name: "Hoodie", category: "Hoodies", colour:"Black", price: 40, image: "/Hoodie/hoodie-black.png"},
-  { id: 6, name: "Hoodie", category: "Hoodies", colour:"Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png"},
-  { id: 7, name: "Hoodie", category: "Hoodies", colour:"White", price: 40, image: "/Hoodie/hoodie-white.png"},
-  { id: 8, name: "Jeans", category: "Jeans", colour:"Blue", price: 45, image: "/Jeans/Jeans-blue.png"},
-  { id: 9, name: "Jeans", category: "Jeans", colour:"Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png"},
-  { id: 10, name: "Jeans", category: "Jeans", colour:"Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png"}
+  { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
+  { id: 2, name: "T-shirt", category: "T-Shirts", colour: "Grey", price: 20, image: "/T-shirt/tshirt-grey.png" },
+  { id: 3, name: "T-shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png" },
+  { id: 4, name: "Hoodie", category: "Hoodies", colour: "Grey", price: 40, image: "/Hoodie/hoodie-grey.png" },
+  { id: 5, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.png" },
+  { id: 6, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png" },
+  { id: 7, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.png" },
+  { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
+  { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
+  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" }
 
 ];
 
@@ -100,67 +101,64 @@ function App() {
     <div>
       <nav className="navbar">
         <div className="nav-links">
-        <Link to="/" onClick={() => setCategory("Home")}>Home</Link>
-        <Link to="/about">About</Link>
-        <div className="clothing-dropdown">
-          <span>Products</span>
-          <div className="clothing-dropdown-menu">
-            <button onClick={() => setCategory("T-Shirts")}>T-Shirts</button>
-            <button onClick={() => setCategory("Hoodies")}>Hoodies</button>
-            <button onClick={() => setCategory("Jeans")}>Jeans</button>
+          <Link to="/" onClick={() => setCategory("All")}>Home</Link>
+          <Link to="/about">About</Link>
+          <div className="clothing-dropdown">
+            <span>Products</span>
+            <div className="clothing-dropdown-menu">
+              <button onClick={() => setCategory("T-Shirts")}>T-Shirts</button>
+              <button onClick={() => setCategory("Hoodies")}>Hoodies</button>
+              <button onClick={() => setCategory("Jeans")}>Jeans</button>
+            </div>
           </div>
         </div>
-        </div>
         <span>RESOLVE</span>
-        <span>Basket: £{totalPrice}</span>
+        <Link to="/basket">Basket: £{totalPrice}</Link>
       </nav>
 
       {/*Anything inside <Routes> changes with the address. Anything outside it, like the navbar, shows on every page.*/}
-      <Routes>
+        <Routes>
         <Route
           path="/"
           element={
             <>
-      <section className="hero">
-        <h2>Dress with intent.</h2>
-        <p>Everyday comfort, effortless style.</p>
-      </section>
+              <section className="hero">
+                <h2>Dress with intent.</h2>
+                <p>Everyday comfort, effortless style.</p>
+              </section>
 
-      <img className="look-book" src="/Lookbook/lookbook.webp" alt="RESOLVE collection" />
+              <img className="look-book" src="/Lookbook/lookbook.webp" alt="RESOLVE collection" />
 
-      <ul className="product-grid">
-        {/* .map() repeats what is inside it for each product. 
+              <ul className="product-grid">
+                {/* .map() repeats what is inside it for each product. 
           key gives each item a unique label so React can tell them apart*/}
-      {shownProducts.map((product) => (
-        <li key={product.id}>
-          {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
-          <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image}/>
-        </li>
-      ))}
-    </ul>
-
-      {/* basket is the array of products, totalItems adds up the quantity of every item in the basket.
-          {} allows you to display that number in JSX*/}
-      <button>Basket: {totalItems}</button>
-      <ul>
-        {/*basket.map shows the clothing name and £price when added to the basket for each item within basket*/}
-        {basket.map((item) => (
-          <li key={item.id}>{item.name} {item.colour} £{item.price} x {item.quantity} 
-            <button onClick={() => removeFromBasket(item)}>Remove from Basket</button>
-          </li>
-        ))}
-      </ul>
-  {/* totalPrice adds up price x quantity for every item in the basket*/ }
-  <p>Total: £ {totalPrice}</p>
-  {/* setBasket([]) replaces the basket with an empty list. The count and total update by themselves, because they’re calculated from basket.*/ }
-  <button onClick={() => setBasket([])}>Clear all</button>
-    </>
+                {shownProducts.map((product) => (
+                  <li key={product.id}>
+                    {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
+                    <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} />
+                  </li>
+                ))}
+              </ul>
+            </>
           }
           />
+        
 
-  < Route path = "/about" element = {< About />} />
-          </Routes >
-          </div >
+        < Route path="/about" element={< About />} />
+        
+          <Route
+            path="/basket"
+            element={
+              <Basket
+                basket={basket}
+                removeFromBasket={removeFromBasket}
+                totalPrice={totalPrice}
+                onClear={() => setBasket([])}
+              />
+            }
+          />
+        </Routes>
+    </div>
   );
 }
 
