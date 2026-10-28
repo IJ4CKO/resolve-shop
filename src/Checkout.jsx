@@ -5,6 +5,19 @@ function Checkout(props) {                                                     /
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
 
+    function placeOrder() {
+        fetch("http://localhost:3001/orders", {                         // Fetch (....) sends a request to the address in the brackets
+            method: "POST",                                             // Says we are sending information, not asking for a page
+            headers: { "Content-Type": "application/json" },            // tells the backend the information is written as JSON
+            body: JSON.stringify({                                      // Is the information itself, packed into text: customer;s details, the basket and the total
+                name: name,
+                email: email,
+                address: address,
+                items: props.basket,
+                total: props.totalPrice
+            })
+        });
+    }
     return (                                                              // says "show what's in the brackets". 
         <section>                                                         {/* is a box that holds the page's content */}
             <h2>Checkout</h2>                                             {/* is a heading with the word Checkout */}
@@ -34,7 +47,7 @@ function Checkout(props) {                                                     /
             </ul>
             <p>Total: £{props.totalPrice}</p>
 
-            <button onClick={() => console.log(name, email, address)}>Place order</button>           {/* when clicking Place order button, name, email and address are stored in the browsers hidden pannel*/ }
+            <button onClick={() => placeOrder()}>Place order</button>           {/* when clicking Place order button, name, email and address are stored in the browsers hidden pannel*/ }
 
         </section>                                                        // closes the pages content box
     );
