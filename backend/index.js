@@ -42,6 +42,18 @@ app.post("/orders", async (req, res) => {
     }
 });
 
+// When someone asks for /orders, send back every saved order, newest first.
+app.get("/orders", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+        res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not load the orders" });
+    }
+});
+
+
 // when visiting /db-test run this code. async means the function has to wait for the database,
 //  so it can pause while it waits. req is the request that arrived and res is the response sent back
 app.get("/db-test", async (req, res) => {   
