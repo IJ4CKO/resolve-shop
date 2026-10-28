@@ -128,8 +128,6 @@ function App() {
                 <p>Everyday comfort, effortless style.</p>
               </section>
 
-              <img className="look-book" src="/Lookbook/lookbook.webp" alt="RESOLVE collection" />
-
               <ul className="product-grid">
                 {/* .map() repeats what is inside it for each product. 
                   key gives each item a unique label so React can tell them apart*/}
