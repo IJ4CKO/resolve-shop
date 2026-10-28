@@ -10,6 +10,11 @@ app.get("/hello", (req, res) => {                       // when somone asks dor 
     res.send("The backend is working");
 });
 
+app.post("/orders", (req, res) => {                     // When someone sends information to the address /ordersm run this.
+    console.log("New order received:", req.body);       // Prints what has arrived 
+    res.json({ message: "Order received"});             // Sends the answer back, so the webiste knows it worked.
+});
+
 app.listen(3001, () => {                            
     console.log("Backend running on port 3001");        // starts the server, listening on port 3001, and prints a message to confirm
 });
