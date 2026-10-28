@@ -34,6 +34,8 @@ function Checkout(props) {                                                     /
             </ul>
             <p>Total: £{props.totalPrice}</p>
 
+            <button onClick={() => console.log(name, email, address)}>Place order</button>           {/* when clicking Place order button, name, email and address are stored in the browsers hidden pannel*/ }
+
         </section>                                                        // closes the pages content box
     );
 }
