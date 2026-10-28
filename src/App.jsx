@@ -3,6 +3,7 @@ import "./App.css";
 import { Routes, Route, Link } from "react-router-dom";
 import About from "./About.jsx";
 import Basket from "./Basket.jsx";
+import Checkout from "./Checkout.jsx";
 
 const products = [
   { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
@@ -131,7 +132,7 @@ function App() {
 
               <ul className="product-grid">
                 {/* .map() repeats what is inside it for each product. 
-          key gives each item a unique label so React can tell them apart*/}
+                  key gives each item a unique label so React can tell them apart*/}
                 {shownProducts.map((product) => (
                   <li key={product.id}>
                     {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
@@ -144,8 +145,15 @@ function App() {
           />
         
 
+
+        {/* When the address is /about, show the About page*/}
         < Route path="/about" element={< About />} />
+
+        {/* When the address is /checkout, show the Checkout page */}
+        < Route path="/checkout" element ={< Checkout />} />
         
+
+          {/* When the address is /basket, the Basket page is shown. The basket and its functions are passed as props */}
           <Route
             path="/basket"
             element={
