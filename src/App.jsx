@@ -148,7 +148,12 @@ function App() {
         < Route path="/about" element={< About />} />
 
         {/* When the address is /checkout, show the Checkout page */}
-        < Route path="/checkout" element ={< Checkout />} />
+        < Route path="/checkout"
+                element ={
+                < Checkout
+                    basket={basket}
+                    totalPrice={totalPrice}
+                />} />
         
 
           {/* When the address is /basket, the Basket page is shown. The basket and its functions are passed as props */}

@@ -1,6 +1,6 @@
 import { useState } from "react";                                         // brings the memory tool into the file.
 
-function Checkout() {                                                     // starts the component and gives it its name.
+function Checkout(props) {                                                     // starts the component and gives it its name.
     const [name, setName] = useState("");                                 // creates the memory, name holds whats typed. setName changes it. "" means it starts empty.
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
@@ -26,8 +26,13 @@ function Checkout() {                                                     // sta
                 onChange={(e) => setAddress(e.target.value)}
             />
 
-
-
+            <h3>Your order</h3>
+            <ul>
+                {props.basket.map((item) => (
+                    <li key={item.id}>{item.name} {item.colour} £{item.price} x {item.quantity} </li>
+                ))}
+            </ul>
+            <p>Total: £{props.totalPrice}</p>
 
         </section>                                                        // closes the pages content box
     );
