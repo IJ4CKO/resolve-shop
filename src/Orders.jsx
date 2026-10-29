@@ -1,3 +1,6 @@
+//When the Orders page opens, useEffect runs once and uses fetch to ask the backend for the orders. 
+// The backend reads them from the database and sends them back, and .map() turns each one into a table row.
+
 import {useState, useEffect } from "react";
 
 function Orders() {
