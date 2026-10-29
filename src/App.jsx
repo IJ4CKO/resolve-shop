@@ -108,9 +108,9 @@ function App() {
           <div className="clothing-dropdown">
             <span>Products</span>
             <div className="clothing-dropdown-menu">
-              <button onClick={() => setCategory("T-Shirts")}>T-Shirts</button>
-              <button onClick={() => setCategory("Hoodies")}>Hoodies</button>
-              <button onClick={() => setCategory("Jeans")}>Jeans</button>
+              <Link to="/" onClick={() => setCategory("T-Shirts")}>T-Shirts</Link>
+              <Link to="/" onClick={() => setCategory("Hoodies")}>Hoodies</Link>
+              <Link to="/" onClick={() => setCategory("Jeans")}>Jeans</Link>
             </div>
           </div>
         </div>

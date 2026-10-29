@@ -88,8 +88,9 @@ button {
   display: block;
 }
 
-.look-book {
-  width: 100%;
-  display: block;
-  border-radius: 8px;
+/* a link inside the dropdown menu*/
+.clothing-dropdown-menu a {
+  display: block;   /* puts each link on its own line */
+  padding: 8px 16px;    /* adds space around each link */
+  white-space: nowrap;    /* stops a word drom breaking across two lines */
 }
