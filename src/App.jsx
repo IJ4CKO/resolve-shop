@@ -4,6 +4,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import About from "./About.jsx";
 import Basket from "./Basket.jsx";
 import Checkout from "./Checkout.jsx";
+import Orders from "./Orders.jsx";
 
 const products = [
   { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
@@ -154,6 +155,8 @@ function App() {
                     basket={basket}
                     totalPrice={totalPrice}
                 />} />
+
+          <Route path="/orders" element={<Orders />} />
         
 
           {/* When the address is /basket, the Basket page is shown. The basket and its functions are passed as props */}
