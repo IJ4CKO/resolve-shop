@@ -32,11 +32,14 @@ function Orders() {
                         <th>Name</th>
                         <th>Email</th>
                         <th>Address</th>
+                        <th>Items</th>
                         <th>Total</th>
                     </tr>
                 </thead>
                 {/* <tbody> is the part holding the data */}
                 <tbody>
+                    {/* Each order has a list of items stored inside it. I use .map() to go through the orders
+                     ,and inside each one I use a second .map() to go through its items. */}
                     {/* orders.map goes through the list of orders and makes one row for each */}
                     {orders.map((order) => (
                         // key={order.id} gives each row its own label, so React can tell them apart
@@ -46,6 +49,15 @@ function Orders() {
                             <td>{order.name}</td>
                             <td>{order.email}</td>
                             <td>{order.address}</td>
+                            <td>
+                                {/* order.items.map(....) goes through the items in this order */}
+                                {order.items.map((item) => (
+                                    // key={item.id} gives each line its own label
+                                    <div key={item.id}>
+                                        {item.name} {item.colour} x {item.quantity}
+                                    </div>
+                                ))}
+                            </td>
                             <td>£{order.total}</td>
                         </tr>
                     ))}
