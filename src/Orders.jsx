@@ -1,24 +1,48 @@
 //When the Orders page opens, useEffect runs once and uses fetch to ask the backend for the orders. 
 // The backend reads them from the database and sends them back, and .map() turns each one into a table row.
 
-import {useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 function Orders() {
     const [orders, setOrders] = useState([]);
+    const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
 
-    // useEffect means run this code when the page first appears.
-    useEffect(() => {
-        // fetch is asking the backend for every saved order.
-        fetch("http://localhost:3001/orders")
-        // .then = when the answer arrives do this next. response.json() turns the answer from text into something the page can use.
-            .then((response) => response.json())
-        // setOrders(data) store the orders in memory and that makes React redrwa the page with them.
-            .then((data) => setOrders(data));
-}, []);
+    // Ask the backend for the orders, sending the password along as a header
+    function loadOrders() {
+        fetch("http://localhost:3001/orders", {
+            headers: { "x-admin-password": password }
+        })
+            .then((response) => {
+                // If the backend said no, show a message and stop here
+                if (!response.ok) {
+                    setMessage("Wrong password");
+                    setOrders([]);
+                    return null;
+                }
+                setMessage("");
+                return response.json();
+            })
+            .then((data) => {
+                // Only store the ortders if we actually received some
+                if (data) {
+                    setOrders(data);
+                }
+            });
+    }
+
 
     return (
         <section>
             <h2>Orders</h2>
+            <input
+                type="password"
+                placeholder="Admin password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={() => loadOrders()}>View orders</button>
+            <p>{message}</p>
             <p>Number of orders: {orders.length}</p>
 
             {/* <table> is the whole grid */}

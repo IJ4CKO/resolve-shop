@@ -44,6 +44,10 @@ app.post("/orders", async (req, res) => {
 
 // When someone asks for /orders, send back every saved order, newest first.
 app.get("/orders", async (req, res) => {
+    // Only carry on if the password sent with the request matches the admin password
+    if (req.headers["x-admin-password"] !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ message: "Wrong password" });
+    }
     try {
         const result = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
         res.json(result.rows);
