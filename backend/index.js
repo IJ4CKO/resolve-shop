@@ -77,7 +77,7 @@ app.get("/db-test", async (req, res) => {
 });
 
 
-const port = process.env.PORT || 3001; // Use the PORT environment variable if available, otherwise default to 3001
+const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
 app.listen(port, () => {                            
     console.log("Backend running on port " + port);
