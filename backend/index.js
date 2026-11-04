@@ -76,7 +76,9 @@ app.get("/db-test", async (req, res) => {
     }
 });
 
- // starts the server, listening on port 3001, and prints a message to confirm
-app.listen(3001, () => {                            
-    console.log("Backend running on port 3001");
+
+const port = process.env.PORT || 3001; // Use the PORT environment variable if available, otherwise default to 3001
+
+app.listen(port, () => {                            
+    console.log("Backend running on port " + port);
 })                        
