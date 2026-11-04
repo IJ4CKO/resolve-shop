@@ -11,8 +11,10 @@ body {
   font-family: "Inter", sans-serif;
   background: var(--main-colour);
   color: var(--text-colour);
+  overflow-x: hidden;
 }
 
 button {
   font-family: inherit;
 }
+

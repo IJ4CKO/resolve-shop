@@ -9,8 +9,8 @@ import { IoBagOutline } from "react-icons/io5";
 
 const products = [
   { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
-  { id: 2, name: "T-shirt", category: "T-Shirts", colour: "Grey", price: 20, image: "/T-shirt/tshirt-grey.png" },
-  { id: 3, name: "T-shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png" },
+  { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Grey", price: 20, image: "/T-shirt/tshirt-grey.png" },
+  { id: 3, name: "T-Shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png" },
   { id: 4, name: "Hoodie", category: "Hoodies", colour: "Grey", price: 40, image: "/Hoodie/hoodie-grey.png" },
   { id: 5, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.png" },
   { id: 6, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png" },
@@ -119,23 +119,27 @@ function App() {
   const shownProducts =
     category === "All" ? products : products.filter((product) => product.category === category);
 
+    const featuredProducts = [1, 6, 9].map((id) => products.find((product) => product.id === id));
+
+    const gridProducts = category === "All" ? featuredProducts : shownProducts;
+
   return (
     <div>
       <nav className="navbar">
+        <Link to="/" className="logo" onClick={() => setCategory("All")}>RESOLVE.</Link>
+
         <div className="nav-links">
-          <Link to="/" onClick={() => setCategory("All")}>Home</Link>
-          <Link to="/about">About</Link>
           <div className="clothing-dropdown">
-            <span>Products</span>
+            <span>Shop</span>
             <div className="clothing-dropdown-menu">
               <Link to="/" onClick={() => setCategory("T-Shirts")}>T-Shirts</Link>
               <Link to="/" onClick={() => setCategory("Hoodies")}>Hoodies</Link>
               <Link to="/" onClick={() => setCategory("Jeans")}>Jeans</Link>
             </div>
           </div>
+          <Link to="/about">About</Link>
+          <Link to="/basket"><IoBagOutline size={24} /></Link>
         </div>
-        <span>RESOLVE</span>
-        <Link to="/basket"><IoBagOutline size={24} /></Link>
       </nav>
 
       <div className="page">
@@ -146,20 +150,35 @@ function App() {
             element={
               <>
                 <section className="hero">
-                  <h2>Dress with intent.</h2>
-                  <p>Everyday comfort, effortless style.</p>
+                  <p className="hero-label">THE RESOLVE COLLECTION</p>
+                  <h1> STRENGTH IN EVERYDAY</h1>
+                  <p>Everyday comfort. Effortless style.</p>
+                  {/* href="#categories" makes the button scroll down to the element with id="categories" */}
+                  <a href="#categories" className="hero-button">SHOP COLLECTION</a>
                 </section>
 
+                <h2 className="section-title">SHOP BY CATEGORY</h2>
+                <div className="category-tiles" id="categories">
+                  <a href="#products" className="category-tile" onClick={() => setCategory("T-Shirts")}>T-SHIRTS</a>
+                  <a href="#products" className="category-tile" onClick={() => setCategory("Hoodies")}>HOODIES</a>
+                  <a href="#products" className="category-tile" onClick={() => setCategory("Jeans")}>JEANS</a>
+                </div>
+
+                <h2 className="section-title" id="products">{category === "All" ? "Featured Products" : category.toUpperCase()}</h2>
                 <ul className="product-grid">
                   {/* .map() repeats what is inside it for each product. 
                   key gives each item a unique label so React can tell them apart*/}
-                  {shownProducts.map((product) => (
+                  {gridProducts.map((product) => (
                     <li key={product.id}>
                       {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
                       <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} colour={product.colour} />
                     </li>
                   ))}
                 </ul>
+                <section className="brand-band">
+                  <h2>MORE THAN CLOTHING</h2>
+                  <p> A mindset built on resilience, individuality and determination.</p>
+                </section>
               </>
             }
           />
@@ -192,8 +211,8 @@ function App() {
               />
             }
           />
-           </Routes>
-           {message && <div className="toast">{message}</div>}
+        </Routes>
+        {message && <div className="toast">{message}</div>}
       </div>
     </div>
   );
