@@ -2,6 +2,7 @@
 // The backend reads them from the database and sends them back, and .map() turns each one into a table row.
 
 import { useState, useEffect } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function Orders() {
     const [orders, setOrders] = useState([]);
@@ -10,7 +11,7 @@ function Orders() {
 
     // Ask the backend for the orders, sending the password along as a header
     function loadOrders() {
-        fetch("http://localhost:3001/orders", {
+        fetch(API_URL + "/orders", {
             headers: { "x-admin-password": password }
         })
             .then((response) => {

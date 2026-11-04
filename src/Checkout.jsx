@@ -1,4 +1,5 @@
-import { useState } from "react";                                         // brings the memory tool into the file.
+import { useState } from "react";                                       // brings the memory tool into the file.
+const API_URL = import.meta.env.VITE_API_URL;                           // stores the web address in a constant called API_URL                         
 
 function Checkout(props) {                                                     // starts the component and gives it its name.
     const [name, setName] = useState("");                                 // creates the memory, name holds whats typed. setName changes it. "" means it starts empty.
@@ -6,7 +7,7 @@ function Checkout(props) {                                                     /
     const [address, setAddress] = useState("");
 
     function placeOrder() {
-        fetch("http://localhost:3001/orders", {                         // Fetch (....) sends a request to the address in the brackets
+        fetch(API_URL + "/orders", {                         // Fetch (....) sends a request to the address in the brackets
             method: "POST",                                             // Says we are sending information, not asking for a page
             headers: { "Content-Type": "application/json" },            // tells the backend the information is written as JSON
             body: JSON.stringify({                                      // Is the information itself, packed into text: customer;s details, the basket and the total
@@ -21,6 +22,9 @@ function Checkout(props) {                                                     /
     return (                                                              // says "show what's in the brackets". 
         <section className="checkout">                                    {/* is a box that holds the page's content */}
             <h2>Checkout</h2>                                             {/* is a heading with the word Checkout */}
+            <p className="demo-notice">
+                Demo shop: Please do not enter real card or personal details.
+            </p>
             <input                                                        // is the box
                 placeholder="Full Name"                                   // The grey hint text within the box
                 value={name}                                              // makes the box show whatever is in memory

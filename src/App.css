@@ -206,3 +206,11 @@ button {
   border-radius: 8px;
   z-index: 100;
 }
+
+.demo-notice {
+  background: #f1f1ee;
+  border-left: 4px solid var(--accent-colour);
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+}
