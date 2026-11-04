@@ -19,7 +19,7 @@ function Checkout(props) {                                                     /
         });
     }
     return (                                                              // says "show what's in the brackets". 
-        <section>                                                         {/* is a box that holds the page's content */}
+        <section className="checkout">                                    {/* is a box that holds the page's content */}
             <h2>Checkout</h2>                                             {/* is a heading with the word Checkout */}
             <input                                                        // is the box
                 placeholder="Full Name"                                   // The grey hint text within the box
@@ -40,14 +40,14 @@ function Checkout(props) {                                                     /
             />
 
             <h3>Your order</h3>
-            <ul>
+            <ul className="checkout-items">
                 {props.basket.map((item) => (
                     <li key={item.id}>{item.name} {item.colour} £{item.price} x {item.quantity} </li>
                 ))}
             </ul>
-            <p>Total: £{props.totalPrice}</p>
+            <p className="checkout-total">Total: £{props.totalPrice}</p>
 
-            <button onClick={() => placeOrder()}>Place order</button>           {/* when clicking Place order button, name, email and address are stored in the browsers hidden pannel*/ }
+            <button className="place-order" onClick={() => placeOrder()}>Place order</button>           {/* when clicking Place order button, name, email and address are stored in the browsers hidden pannel*/ }
 
         </section>                                                        // closes the pages content box
     );

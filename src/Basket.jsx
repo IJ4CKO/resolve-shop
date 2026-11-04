@@ -14,9 +14,13 @@ function Basket(props) {
                 <ul>
                 {/*basket.map shows the clothing name and £price when added to the basket for each item within basket*/}
                 {props.basket.map((item) => (
-                    <li key={item.id}>{item.name} {item.colour} £{item.price} x {item.quantity}
-                        <button onClick={() => props.removeFromBasket(item)}>Remove from Basket</button>
+                    <div className="basket-details">
+                    <li key={item.id} className="basket-item">
+                        {item.name} {item.colour} £{item.price} x {item.quantity}
                     </li>
+                    <img className="basket-image" src={item.image} alt={item.name} />
+                        <button onClick={() => props.removeFromBasket(item)}>Remove from Basket</button>
+                    </div>
                 ))}
                 </ul>
 

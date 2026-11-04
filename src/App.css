@@ -10,7 +10,16 @@
   padding: 5px;
   border-radius: 10px;
   border: 1px solid var(--secondary-colour);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+  /* .product-card:hover means a product card while the card is hovering over it
+     translateY(-6px) moves the card up by 6 pixels, so it looks like it is shifting 
+     box-shadow:... adds a soft shadow below it. the first two numbers are how far across and down the shadow sits
+     the third is how blurry it is and the rest are the strenfth that is very faint. */
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  }
 
 .navbar {
   display: flex;
@@ -93,4 +102,107 @@ button {
   display: block;   /* puts each link on its own line */
   padding: 8px 16px;    /* adds space around each link */
   white-space: nowrap;    /* stops a word drom breaking across two lines */
+}
+
+/* .navbar a svg means an icon indside a link in the navbar. Icons are drawn as svg elements
+   vertical-align: middle lines them up with the middle of the text */
+.navbar a svg{
+  vertical-align: middle;
+}
+
+.page {
+  max-width:1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* width and height set the size, in pixels. object-fit: contain shows the whole photo without cropping it, as on the product cards
+   border-radius rounds the corners */
+.basket-image {
+  width: 50px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* display: flex puts the three things side by side. align-items: centre lines them up dorn the middle.
+   gap: 16px leaves 16 pixels between them. padding 12px 0 adds space above and below each row,
+   border-bottom draws a thin line between rows. lost-style: none removes the bullet points.
+   flex: 1 makes the details take up all the spare space, which pushes the remove button to the right edge. */
+.basket-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--secondary-colour);
+  list-style: none;
+}
+
+.basket-details {
+  flex: 1;
+}
+
+/* max-width stops the form stretching too wide to read. .checkout  input means an input box inside the checkout page so it won't change any other page
+   display: block and width: 100% stack each other on its own line, as wide as the form. 
+   padding: 12px gives the typing space inside each box, margin-bottom leaves a gap beneath.
+   .checkout input: focus means the box you've clicken in. It draws a royal blue line around it, so you can see what box is acitve.*/
+.checkout {
+  max-width: 500px;
+}
+
+.checkout input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--secondary-colour);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.checkout input:focus {
+  outline: 2px solid var(--accent-colour);
+}
+
+/* .checkout h3 adds space above the "Your order" heading, so it separates from the form.
+   .checkout-items removes the bullet points, and each li gets a thing grey line under it
+   .checkout-total makes the total larger and bolder
+   .place-order makes the button as wide as the form, with more padding and a pointing hand. */
+.checkout h3 {
+  margin-top: 32px;
+}
+
+.checkout-items {
+  list-style: none;
+  padding: 0;
+}
+
+.checkout-items li {
+  border-bottom: 1px solid var(--secondary-colour);
+  padding: 8px 0;
+}
+
+.checkout-total {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 16px;
+}
+
+.place-order {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--text-colour);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 8px;
+  z-index: 100;
 }

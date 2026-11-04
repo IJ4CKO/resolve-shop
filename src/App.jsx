@@ -5,6 +5,7 @@ import About from "./About.jsx";
 import Basket from "./Basket.jsx";
 import Checkout from "./Checkout.jsx";
 import Orders from "./Orders.jsx";
+import { IoBagOutline } from "react-icons/io5";
 
 const products = [
   { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
@@ -14,9 +15,9 @@ const products = [
   { id: 5, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.png" },
   { id: 6, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png" },
   { id: 7, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.png" },
-  { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
-  { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
-  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" }
+  { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/jeans-blue.png" },
+  { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/jeans-lightgrey.png" },
+  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/jeans-darkgrey.png" }
 
 ];
 
@@ -44,6 +45,9 @@ function App() {
   //useState([]) starts as an empty array because the basket starts as empty and holds a list of products.
   const [basket, setBasket] = useState([]);
 
+  //message shows the words to show and setMessage changes the message. useState("") starts as an empty string.
+  const [message, setMessage] = useState("");
+
   // the 0 at the end of .reduce() is the starting value of the running total.
   const totalItems = basket.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -55,6 +59,8 @@ function App() {
   //a new array is used because React only redraws the page when it is given a new array
   // : item keeps every other item the same.
   function addToBasket(product) {
+    // everytime something is added the message joins the name and colour of the product together with "added to basket" and stores it in message, which React redraws on the page.
+    setMessage(product.name + " " + product.colour + " added to basket");
     const exists = basket.find((item) => item.id === product.id);
     if (exists) {
       setBasket(
@@ -115,49 +121,50 @@ function App() {
           </div>
         </div>
         <span>RESOLVE</span>
-        <Link to="/basket">Basket: £{totalPrice}</Link>
+        <Link to="/basket"><IoBagOutline size={24} /></Link>
       </nav>
 
-      {/*Anything inside <Routes> changes with the address. Anything outside it, like the navbar, shows on every page.*/}
+      <div className="page">
+        {/*Anything inside <Routes> changes with the address. Anything outside it, like the navbar, shows on every page.*/}
         <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <section className="hero">
-                <h2>Dress with intent.</h2>
-                <p>Everyday comfort, effortless style.</p>
-              </section>
+          <Route
+            path="/"
+            element={
+              <>
+                <section className="hero">
+                  <h2>Dress with intent.</h2>
+                  <p>Everyday comfort, effortless style.</p>
+                </section>
 
-              <ul className="product-grid">
-                {/* .map() repeats what is inside it for each product. 
+                <ul className="product-grid">
+                  {/* .map() repeats what is inside it for each product. 
                   key gives each item a unique label so React can tell them apart*/}
-                {shownProducts.map((product) => (
-                  <li key={product.id}>
-                    {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
-                    <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} />
-                  </li>
-                ))}
-              </ul>
-            </>
-          }
+                  {shownProducts.map((product) => (
+                    <li key={product.id}>
+                      {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
+                      <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            }
           />
-        
 
 
-        {/* When the address is /about, show the About page*/}
-        < Route path="/about" element={< About />} />
 
-        {/* When the address is /checkout, show the Checkout page */}
-        < Route path="/checkout"
-                element ={
-                < Checkout
-                    basket={basket}
-                    totalPrice={totalPrice}
-                />} />
+          {/* When the address is /about, show the About page*/}
+          < Route path="/about" element={< About />} />
+
+          {/* When the address is /checkout, show the Checkout page */}
+          < Route path="/checkout"
+            element={
+              < Checkout
+                basket={basket}
+                totalPrice={totalPrice}
+              />} />
 
           <Route path="/orders" element={<Orders />} />
-        
+
 
           {/* When the address is /basket, the Basket page is shown. The basket and its functions are passed as props */}
           <Route
@@ -171,7 +178,9 @@ function App() {
               />
             }
           />
-        </Routes>
+           </Routes>
+           {message && <div className="toast">{message}</div>}
+      </div>
     </div>
   );
 }
