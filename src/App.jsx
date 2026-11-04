@@ -30,7 +30,8 @@ function ProductCard(props) {
     <div className="product-card">
       <img src={props.image} alt={props.name} />
       <h2>{props.name}</h2>
-      <p>£{props.price}</p>
+      <p className="product-colour">{props.colour}</p>
+      <p className="product-price">£{props.price}</p>
 
       {/* When the button is clicked, it calls onAdd (addToBasket from App)
         and it passes the product*/}
@@ -155,7 +156,7 @@ function App() {
                   {shownProducts.map((product) => (
                     <li key={product.id}>
                       {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
-                      <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} />
+                      <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} colour={product.colour} />
                     </li>
                   ))}
                 </ul>

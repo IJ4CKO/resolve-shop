@@ -248,3 +248,13 @@ button {
   padding: 14px;
   font-weight: 600;
 }
+
+.product-colour {
+  color: var(--text-colour);
+  margin: 0 0 8px;
+}
+
+.product-price {
+  font-weight: 700;
+  font-size: 18px;
+}
