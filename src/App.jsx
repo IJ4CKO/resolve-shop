@@ -15,9 +15,9 @@ const products = [
   { id: 5, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.png" },
   { id: 6, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png" },
   { id: 7, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.png" },
-  { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/jeans-blue.png" },
-  { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/jeans-lightgrey.png" },
-  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/jeans-darkgrey.png" }
+  { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
+  { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
+  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" }
 
 ];
 
