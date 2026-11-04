@@ -17,12 +17,12 @@ app.use(cors());
 // lets it read information sent to it in a standard format called JSON, needed for orders                                                      
 app.use(express.json());  
 
-// when somone asks dor the address /hello, the answer will be the backend is working
+// when somone asks for the address /hello, the answer will be the backend is working
 app.get("/hello", (req, res) => { 
     res.send("The backend is working")                                      
 });
 
- // When someone sends an order to /orders, savie it in the database
+ // When someone sends an order to /orders, save it in the database
 app.post("/orders", async (req, res) => {                                     
     try{
         // Pull the details out of the request, so they can be used one by one

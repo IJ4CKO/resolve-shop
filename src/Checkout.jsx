@@ -46,7 +46,7 @@ function Checkout(props) {                                                     /
             <h3>Your order</h3>
             <ul className="checkout-items">
                 {props.basket.map((item) => (
-                    <li key={item.id}>{item.name} {item.colour} £{item.price} x {item.quantity} </li>
+                    <li key={item.id}>{item.name} {item.colour} ({item.size}) £{item.price} x {item.quantity} </li>
                 ))}
             </ul>
             <p className="checkout-total">Total: £{props.totalPrice}</p>

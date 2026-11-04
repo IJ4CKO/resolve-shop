@@ -389,3 +389,23 @@ scroll-behavior: smooth; }
     bottom: 16px;
   }
 }
+
+.size-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.size-button {
+  background: white;
+  color: var(--text-colour);
+  border: 1px solid var(--secondary-colour);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.size-button.selected {
+  background: var(--text-colour);
+  color: white;
+}

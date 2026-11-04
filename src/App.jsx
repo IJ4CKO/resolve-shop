@@ -26,6 +26,9 @@ const products = [
 // so every product is laid out the same way.
 function ProductCard(props) {
 
+  const [size, setSize] = useState("");
+  const sizes = ["S", "M", "L", "XL", "XXL"];
+
   return (
     <div className="product-card">
       <img src={props.image} alt={props.name} />
@@ -33,9 +36,22 @@ function ProductCard(props) {
       <p className="product-colour">{props.colour}</p>
       <p className="product-price">£{props.price}</p>
 
+      {/* .map() makes one small button for each size. CLicking it stores it with setSize. The one that matches the stored size gets an extra class, selected, so it looks different */}
+      <div className="size-options">
+        {sizes.map((s) => (
+          <button
+          key={s}
+          className={size === s ? "size-button selected" : "size-button"}
+          onClick={() => setSize(s)}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
       {/* When the button is clicked, it calls onAdd (addToBasket from App)
-        and it passes the product*/}
-      <button onClick={() => props.onAdd(props.product)}>Add to Basket</button>
+        and it passes the product and size. disabled greys out the button until a size has been picked.*/}
+      <button disabled={size === ""} onClick={() => props.onAdd(props.product, size)}>Add to Basket</button>
     </div>
   );
 }
@@ -72,14 +88,14 @@ function App() {
   //setBasket() tells react to update the basket state
   //a new array is used because React only redraws the page when it is given a new array
   // : item keeps every other item the same.
-  function addToBasket(product) {
+  function addToBasket(product, size) {
     // everytime something is added the message joins the name and colour of the product together with "added to basket" and stores it in message, which React redraws on the page.
-    setMessage(product.name + " " + product.colour + " added to basket");
-    const exists = basket.find((item) => item.id === product.id);
+    setMessage(product.name + " " + product.colour + " (" + size + ") added to basket");
+    const exists = basket.find((item) => item.id === product.id && item.size === size);
     if (exists) {
       setBasket(
         basket.map((item) =>
-          item.id === product.id
+          item.id === product.id && item.size === size
             // the ... means take everything from this object, for Hoodie it would be id, name, price and quantity
             ? { ...item, quantity: item.quantity + 1 }
             : item
@@ -87,7 +103,7 @@ function App() {
       );
 
     } else {
-      setBasket([...basket, { ...product, quantity: 1 }]);
+      setBasket([...basket, { ...product, size: size, quantity: 1 }]);
     }
   }
 
@@ -101,14 +117,14 @@ function App() {
     if (product.quantity > 1) {
       setBasket(
         basket.map((item) =>
-          item.id === product.id
+          item.id === product.id && item.size === product.size
 
             ? { ...item, quantity: item.quantity - 1 }
             : item
         )
       );
     } else {
-      setBasket(basket.filter((item) => item.id !== product.id));
+      setBasket(basket.filter((item) => !(item.id === product.id && item.size === product.size)));
 
     }
   }

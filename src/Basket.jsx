@@ -16,13 +16,15 @@ function Basket(props) {
                     <ul>
                         {/*basket.map shows the clothing name and £price when added to the basket for each item within basket*/}
                         {props.basket.map((item) => (
-                            <div className="basket-details">
-                                <li key={item.id} className="basket-item">
-                                    {item.name} {item.colour} £{item.price} x {item.quantity}
-                                </li>
+                            <li key={item.id + item.size} className="basket-row">
                                 <img className="basket-image" src={item.image} alt={item.name} />
+
+                                <div className="basket-details">
+                                    {item.name} {item.colour} ({item.size}) £{item.price} x {item.quantity}
+                                </div>
+
                                 <button onClick={() => props.removeFromBasket(item)}>Remove from Basket</button>
-                            </div>
+                            </li>
                         ))}
                     </ul>
 
@@ -30,7 +32,7 @@ function Basket(props) {
                         {/* totalPrice adds up price x quantity for every item in the basket*/}
                         <p>Total: £ {props.totalPrice}</p>
                         <button className="checkout-button" onClick={() => navigate("/checkout")}>Checkout</button>
-                        <button className="clear-button" onClick={() => props.onClear([])}>Clear all</button>
+                        <button className="clear-button" onClick={() => props.onClear()}>Clear all</button>
                     </div>
                 </>
             )}
