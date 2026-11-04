@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import { Routes, Route, Link } from "react-router-dom";
 import About from "./About.jsx";
@@ -47,6 +47,19 @@ function App() {
 
   //message shows the words to show and setMessage changes the message. useState("") starts as an empty string.
   const [message, setMessage] = useState("");
+
+  // When the message changes, wait 2 seconds to clear it.
+  useEffect(() => {
+    if (message === "") {
+      return;
+    }
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 2000);
+
+    // If a new message arrives first, cancel the old timer
+    return () => clearTimeout(timer);
+  }, [message]);
 
   // the 0 at the end of .reduce() is the starting value of the running total.
   const totalItems = basket.reduce((sum, item) => sum + item.quantity, 0);

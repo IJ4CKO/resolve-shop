@@ -214,3 +214,37 @@ button {
   border-radius: 4px;
   font-size: 14px;
 }
+
+/* keeps the whole basket no wider than 700 pixels */
+.basket-page {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* draws a rounded box round the total and the buttons with a very faint shadow */
+.basket-summary {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--secondary-colour);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.clear-button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 14px;
+  font-weight: 600;
+}
+
+.clear-button:hover {
+  color: var(--text-colour);
+  border-color: var(--text-colour);
+}
+
+.checkout-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  font-weight: 600;
+}
