@@ -339,3 +339,51 @@ button {
 /* makes the page scroll smoothly when you click a link to an anchor on the page */
 html { 
 scroll-behavior: smooth; } 
+
+@media (max-width: 700px) {
+  /*.page and .navbar get less space at the sides, more screen is used.
+   logo and .nav-links get smaller, so the logo, shop, about and the bag fit on one line
+   .hero h1 shrinks the big heading, so it doesn't spill off the screen
+   .category-tiles stacks the three tiles one above the other, tiles get less height
+   .product-grid changes from three columns to two, with a smaller gap
+   .toast stretches the "added to basket" message across the bottom of the screen*/
+  .page {
+    padding: 0 16px;
+  }
+    .navbar {
+    padding: 12px 16px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .nav-links {
+    gap: 16px;
+    font-size: 12px;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .category-tiles {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .category-tile {
+    padding: 24px 16px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+}
