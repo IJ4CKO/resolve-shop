@@ -8,12 +8,12 @@ import Orders from "./Orders.jsx";
 import { IoBagOutline } from "react-icons/io5";
 
 const products = [
-  { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "Black", price: 20, image: "/T-Shirt/tshirt-black.png" },
-  { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Burgundy", price: 20, image: "/T-Shirt/tshirt-burgundy.png" },
-  { id: 3, name: "T-Shirt", category: "T-Shirts", colour: "Cream", price: 20, image: "/T-Shirt/tshirt-cream.png" },
-  { id: 4, name: "T-Shirt", category: "T-Shirts", colour: "Light Grey", price: 20, image: "/T-Shirt/tshirt-lightgrey.png" },
-  { id: 5, name: "T-Shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-Shirt/tshirt-royalblue.png" },
-  { id: 6, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-Shirt/tshirt-white.png" },
+  { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "Black", price: 20, image: "/T-shirt/tshirt-black.png" },
+  { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Burgundy", price: 20, image: "/T-shirt/tshirt-burgundy.png" },
+  { id: 3, name: "T-Shirt", category: "T-Shirts", colour: "Cream", price: 20, image: "/T-shirt/tshirt-cream.png" },
+  { id: 4, name: "T-Shirt", category: "T-Shirts", colour: "Light Grey", price: 20, image: "/T-shirt/tshirt-lightgrey.png" },
+  { id: 5, name: "T-Shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png" },
+  { id: 6, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
   { id: 7, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.webp" },
   { id: 8, name: "Hoodie", category: "Hoodies", colour: "Burgundy", price: 40, image: "/Hoodie/hoodie-burgundy.webp" },
   { id: 9, name: "Hoodie", category: "Hoodies", colour: "Cream", price: 40, image: "/Hoodie/hoodie-cream.webp" },
