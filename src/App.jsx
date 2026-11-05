@@ -8,26 +8,36 @@ import Orders from "./Orders.jsx";
 import { IoBagOutline } from "react-icons/io5";
 
 const products = [
-  { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
-  { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Grey", price: 20, image: "/T-shirt/tshirt-grey.png" },
-  { id: 3, name: "T-Shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png" },
-  { id: 4, name: "Hoodie", category: "Hoodies", colour: "Grey", price: 40, image: "/Hoodie/hoodie-grey.png" },
-  { id: 5, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.png" },
-  { id: 6, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.png" },
-  { id: 7, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.png" },
-  { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
-  { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
-  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" },
-  { id: 11, name: "Joggers", category: "Joggers", colour: "Black", price: 30, image: "/Joggers/joggers-black.png" },
-  { id: 12, name: "Joggers", category: "Joggers", colour: "Light Grey", price: 30, image: "/Joggers/joggers-lightgrey.png" },
-  { id: 13, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 30, image: "/Joggers/joggers-navyblue.png" },
-  { id: 14, name: "Quarter Zips", category: "Quarter Zips", colour: "Black", price: 25, image: "/Quarter Zip/quarter-zip-black.png" },
-  { id: 15, name: "Quarter Zips", category: "Quarter Zips", colour: "Burgandy", price: 25, image: "/Quarter Zip/quarter-zip-burgandy.png" },
-  { id: 16, name: "Quarter Zips", category: "Quarter Zips", colour: "Light Grey", price: 25, image: "/Quarter Zip/quarter-zip-lightgrey.png" },
-  { id: 17, name: "Quarter Zips", category: "Quarter Zips", colour: "Royal Blue", price: 25, image: "/Quarter Zip/quarter-zip-royalblue.png" },
-  { id: 18, name: "Quarter Zips", category: "Quarter Zips", colour: "White", price: 25, image: "/Quarter Zip/quarter-zip-white.png" }
-  
-  
+  { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "Black", price: 20, image: "/T-Shirt/tshirt-black.png" },
+  { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Burgandy", price: 20, image: "/T-Shirt/tshirt-burgandy.png" },
+  { id: 3, name: "T-Shirt", category: "T-Shirts", colour: "Cream", price: 20, image: "/T-Shirt/tshirt-cream.png" },
+  { id: 4, name: "T-Shirt", category: "T-Shirts", colour: "Light Grey", price: 20, image: "/T-Shirt/tshirt-lightgrey.png" },
+  { id: 5, name: "T-Shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-Shirt/tshirt-royalblue.png" },
+  { id: 6, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-Shirt/tshirt-white.png" },
+  { id: 7, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.webp" },
+  { id: 8, name: "Hoodie", category: "Hoodies", colour: "Burgandy", price: 40, image: "/Hoodie/hoodie-burgandy.webp" },
+  { id: 9, name: "Hoodie", category: "Hoodies", colour: "Cream", price: 40, image: "/Hoodie/hoodie-cream.webp" },
+  { id: 10, name: "Hoodie", category: "Hoodies", colour: "Light Grey", price: 40, image: "/Hoodie/hoodie-lightgrey.webp" },
+  { id: 11, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.webp" },
+  { id: 12, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.webp" },
+  { id: 13, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
+  { id: 14, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
+  { id: 15, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" },
+  { id: 16, name: "Joggers", category: "Joggers", colour: "Black", price: 35, image: "/Joggers/joggers-black.png" },
+  { id: 17, name: "Joggers", category: "Joggers", colour: "Light Grey", price: 35, image: "/Joggers/joggers-lightgrey.png" },
+  { id: 18, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 35, image: "/Joggers/joggers-navyblue.png" },
+  { id: 19, name: "Quarter Zips", category: "Quarter Zips", colour: "Black", price: 30, image: "/Quarter Zip/quarter-zip-black.png" },
+  { id: 20, name: "Quarter Zips", category: "Quarter Zips", colour: "Burgandy", price: 30, image: "/Quarter Zip/quarter-zip-burgandy.png" },
+  { id: 21, name: "Quarter Zips", category: "Quarter Zips", colour: "Light Grey", price: 30, image: "/Quarter Zip/quarter-zip-lightgrey.png" },
+  { id: 22, name: "Quarter Zips", category: "Quarter Zips", colour: "Royal Blue", price: 30, image: "/Quarter Zip/quarter-zip-royalblue.png" },
+  { id: 23, name: "Quarter Zips", category: "Quarter Zips", colour: "White", price: 30, image: "/Quarter Zip/quarter-zip-white.png" },
+  { id: 24, name: "Quarter Zips", category: "Quarter Zips", colour: "Cream", price: 30, image: "/Quarter Zip/quarter-zip-cream.png" },
+  { id: 25, name: "Polo Shirts", category: "Polo Shirts", colour: "Black", price: 40, image: "/Polo Shirts/poloshirt-black.png" },
+  { id: 26, name: "Polo Shirts", category: "Polo Shirts", colour: "Burgandy", price: 40, image: "/Polo Shirts/poloshirt-burgandy.png" },
+  { id: 27, name: "Polo Shirts", category: "Polo Shirts", colour: "Cream", price: 40, image: "/Polo Shirts/poloshirt-cream.png" },
+  { id: 28, name: "Polo Shirts", category: "Polo Shirts", colour: "Light Grey", price: 40, image: "/Polo Shirts/poloshirt-lightgrey.png" },
+  { id: 29, name: "Polo Shirts", category: "Polo Shirts", colour: "Royal Blue", price: 40, image: "/Polo Shirts/poloshirt-royalblue.png" },
+  { id: 30, name: "Polo Shirts", category: "Polo Shirts", colour: "White", price: 40, image: "/Polo Shirts/poloshirt-white.png" }  
 ];
 
 //Props are how information is passed from a parent component to a child component
@@ -144,7 +154,7 @@ function App() {
   const shownProducts =
     category === "All" ? products : products.filter((product) => product.category === category);
 
-    const featuredProducts = [1, 6, 9, 11, 15].map((id) => products.find((product) => product.id === id));
+    const featuredProducts = [1, 8, 13, 17, 22, 27].map((id) => products.find((product) => product.id === id));
 
     const gridProducts = category === "All" ? featuredProducts : shownProducts;
 
@@ -162,6 +172,8 @@ function App() {
               <Link to="/" onClick={() => setCategory("Jeans")}>Jeans</Link>
               <Link to="/" onClick={() => setCategory("Joggers")}>Joggers</Link>
               <Link to="/" onClick={() => setCategory("Quarter Zips")}>Quarter Zip</Link>
+              <Link to="/" onClick={() => setCategory("Polo Shirts")}>POLO SHIRTS</Link>
+
             </div>
           </div>
           <Link to="/about">About</Link>
@@ -191,6 +203,7 @@ function App() {
                   <a href="#products" className="category-tile" onClick={() => setCategory("Jeans")}>JEANS</a>
                   <a href="#products" className="category-tile" onClick={() => setCategory("Joggers")}>JOGGERS</a>
                   <a href="#products" className="category-tile" onClick={() => setCategory("Quarter Zips")}>QUARTER ZIPS</a>
+                  <a href="#products" className="category-tile" onClick={() => setCategory("Polo Shirts")}>POLO SHIRTS</a>
                 </div>
 
                 <h2 className="section-title" id="products">{category === "All" ? "Featured Products" : category.toUpperCase()}</h2>
