@@ -17,7 +17,10 @@ const products = [
   { id: 7, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.png" },
   { id: 8, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
   { id: 9, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
-  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" }
+  { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" },
+  { id: 11, name: "Joggers", category: "Joggers", colour: "Black", price: 30, image: "/Joggers/joggers-black.png" },
+  { id: 12, name: "Joggers", category: "Joggers", colour: "Light Grey", price: 30, image: "/Joggers/joggers-lightgrey.png" },
+  { id: 13, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 30, image: "/Joggers/joggers-navyblue.png" }
 
 ];
 
@@ -135,7 +138,7 @@ function App() {
   const shownProducts =
     category === "All" ? products : products.filter((product) => product.category === category);
 
-    const featuredProducts = [1, 6, 9].map((id) => products.find((product) => product.id === id));
+    const featuredProducts = [1, 6, 9, 11].map((id) => products.find((product) => product.id === id));
 
     const gridProducts = category === "All" ? featuredProducts : shownProducts;
 
@@ -151,6 +154,7 @@ function App() {
               <Link to="/" onClick={() => setCategory("T-Shirts")}>T-Shirts</Link>
               <Link to="/" onClick={() => setCategory("Hoodies")}>Hoodies</Link>
               <Link to="/" onClick={() => setCategory("Jeans")}>Jeans</Link>
+              <Link to="/" onClick={() => setCategory("Joggers")}>Joggers</Link>
             </div>
           </div>
           <Link to="/about">About</Link>
@@ -178,6 +182,7 @@ function App() {
                   <a href="#products" className="category-tile" onClick={() => setCategory("T-Shirts")}>T-SHIRTS</a>
                   <a href="#products" className="category-tile" onClick={() => setCategory("Hoodies")}>HOODIES</a>
                   <a href="#products" className="category-tile" onClick={() => setCategory("Jeans")}>JEANS</a>
+                  <a href="#products" className="category-tile" onClick={() => setCategory("Joggers")}>JOGGERS</a>
                 </div>
 
                 <h2 className="section-title" id="products">{category === "All" ? "Featured Products" : category.toUpperCase()}</h2>

@@ -60,3 +60,5 @@ It answers four routes:
 - GET /orders: first checks that the x-admin-password header matches ADMIN_PASSWORD, and replies with a 401 if it doesn't, sending nothing. If it matches, it sends back every saved order, newest first.
 
 It reaches the database using DATABASE_URL, read with process.env.DATABASE_URL. On my computer it comes from backend/.env. On Render there's no .env, because it isn't on GitHub, so the same settings (DATABASE_URL and ADMIN_PASSWORD) are typed into Render's Environment page. It reads the port from process.env.PORT || 3001, meaning use Render's port if it gives one, otherwise use 3001.
+
+.env ( in the backend folder)
