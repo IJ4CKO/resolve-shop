@@ -43,3 +43,20 @@ basket in the body is sent under the name items. This is because the backend rea
 
 Orders.jsx:
 is the shop owner's page, shown at /orders. It isn't linked from the navigation bar, so customers won't come across it, and the password is what actually protects the orders. It keeps the orders, the typed password and message in state. When View orders is pressed, loadOrders uses fetch to ask the backend for orders ( API_URL + "/orders) along with the password in the header {"x-admin-password": password}. The backend compares it with ADMIN_PASSWORD and replies with a 401 if it's wrong and a message will be displayed "Wrong password". If it is right, the orders are stored in state and shown in a table, with one row for each order and a second .map() for the items inside.
+
+backend/index.js:
+Is the backend, a small program that runs on Render and sits between the website, which runs in the customer's browser, and the database, which is on Neon. It runs on a server I control, so it can safely hold the secrets that the website can't.
+
+Its tools:
+- express: listens for requests at addresses (routes) and sends replies. express.json() lets it read the JSON that the website sends.
+- cors: allows the website to ask the backend for things, even though they have different web addresses. Browsers block this unless the server says it's allowed.
+- pg: is how the backend talks to Neon. It creates a pool (a set of ready-to-use connections), and pool.query sends one question down it.
+- dotenv: reads the .env file when the backend starts.
+
+It answers four routes:
+- GET /hello: replies "The backend is working".
+- GET /db-test: asks the database for the current time, so a reply proves the backend can reach it.
+- POST /orders: reads the name, email, address, items and total from req.body, saves them with INSERT INTO, and replies with the new order's number. The $1, $2... blanks stop the customer's typing being treated as code. A try / catch means one failure doesn't crash the backend.
+- GET /orders: first checks that the x-admin-password header matches ADMIN_PASSWORD, and replies with a 401 if it doesn't, sending nothing. If it matches, it sends back every saved order, newest first.
+
+It reaches the database using DATABASE_URL, read with process.env.DATABASE_URL. On my computer it comes from backend/.env. On Render there's no .env, because it isn't on GitHub, so the same settings (DATABASE_URL and ADMIN_PASSWORD) are typed into Render's Environment page. It reads the port from process.env.PORT || 3001, meaning use Render's port if it gives one, otherwise use 3001.
