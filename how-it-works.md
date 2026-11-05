@@ -45,7 +45,7 @@ Orders.jsx:
 is the shop owner's page, shown at /orders. It isn't linked from the navigation bar, so customers won't come across it, and the password is what actually protects the orders. It keeps the orders, the typed password and message in state. When View orders is pressed, loadOrders uses fetch to ask the backend for orders ( API_URL + "/orders) along with the password in the header {"x-admin-password": password}. The backend compares it with ADMIN_PASSWORD and replies with a 401 if it's wrong and a message will be displayed "Wrong password". If it is right, the orders are stored in state and shown in a table, with one row for each order and a second .map() for the items inside.
 
 backend/index.js:
-Is the backend, a small program that runs on Render and sits between the website, which runs in the customer's browser, and the database, which is on Neon. It runs on a server I control, so it can safely hold the secrets that the website can't.
+Is the backend, a small program that runs On Render and sits between the website, which runs in the customer's browser, and the database, which is on Neon. It runs on a server I control, so it can safely hold the secrets that the website can't.
 
 Its tools:
 - express: listens for requests at addresses (routes) and sends replies. express.json() lets it read the JSON that the website sends.
@@ -61,4 +61,12 @@ It answers four routes:
 
 It reaches the database using DATABASE_URL, read with process.env.DATABASE_URL. On my computer it comes from backend/.env. On Render there's no .env, because it isn't on GitHub, so the same settings (DATABASE_URL and ADMIN_PASSWORD) are typed into Render's Environment page. It reads the port from process.env.PORT || 3001, meaning use Render's port if it gives one, otherwise use 3001.
 
-.env ( in the backend folder)
+.env ( in the backend folder):
+Holds the database url and the admin password. If either were public, anyone could read or change the orders and customers' details, so it stays on my computer and is listed in .gitignore, which stops Git sending it to GitHub. On Render there's no .env, so the same two settings are typed into Render's Environment page.
+
+.gitignore:
+Tells Git what files and folders to leave out of its snapshots and off GitHub. It includes .env, so the secrets stay private, and node_modules, the large folder of downloaded packages that npm install can recreate.
+
+
+public folder: 
+Holds the images, such as the product photos and the lookbook. Files in it are served as they are, so public/Hoodie/hoodie-black.png is reached at /Hoodie/hoodie-black.png. File names must match the paths in the product list exactly, including capital letters, because the live server treats capitals as different.

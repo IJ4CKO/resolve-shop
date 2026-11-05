@@ -20,8 +20,14 @@ const products = [
   { id: 10, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" },
   { id: 11, name: "Joggers", category: "Joggers", colour: "Black", price: 30, image: "/Joggers/joggers-black.png" },
   { id: 12, name: "Joggers", category: "Joggers", colour: "Light Grey", price: 30, image: "/Joggers/joggers-lightgrey.png" },
-  { id: 13, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 30, image: "/Joggers/joggers-navyblue.png" }
-
+  { id: 13, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 30, image: "/Joggers/joggers-navyblue.png" },
+  { id: 14, name: "Quarter Zips", category: "Quarter Zips", colour: "Black", price: 25, image: "/Quarter Zip/quarter-zip-black.png" },
+  { id: 15, name: "Quarter Zips", category: "Quarter Zips", colour: "Burgandy", price: 25, image: "/Quarter Zip/quarter-zip-burgandy.png" },
+  { id: 16, name: "Quarter Zips", category: "Quarter Zips", colour: "Light Grey", price: 25, image: "/Quarter Zip/quarter-zip-lightgrey.png" },
+  { id: 17, name: "Quarter Zips", category: "Quarter Zips", colour: "Royal Blue", price: 25, image: "/Quarter Zip/quarter-zip-royalblue.png" },
+  { id: 18, name: "Quarter Zips", category: "Quarter Zips", colour: "White", price: 25, image: "/Quarter Zip/quarter-zip-white.png" }
+  
+  
 ];
 
 //Props are how information is passed from a parent component to a child component
@@ -138,7 +144,7 @@ function App() {
   const shownProducts =
     category === "All" ? products : products.filter((product) => product.category === category);
 
-    const featuredProducts = [1, 6, 9, 11].map((id) => products.find((product) => product.id === id));
+    const featuredProducts = [1, 6, 9, 11, 15].map((id) => products.find((product) => product.id === id));
 
     const gridProducts = category === "All" ? featuredProducts : shownProducts;
 
@@ -155,6 +161,7 @@ function App() {
               <Link to="/" onClick={() => setCategory("Hoodies")}>Hoodies</Link>
               <Link to="/" onClick={() => setCategory("Jeans")}>Jeans</Link>
               <Link to="/" onClick={() => setCategory("Joggers")}>Joggers</Link>
+              <Link to="/" onClick={() => setCategory("Quarter Zips")}>Quarter Zip</Link>
             </div>
           </div>
           <Link to="/about">About</Link>
@@ -183,6 +190,7 @@ function App() {
                   <a href="#products" className="category-tile" onClick={() => setCategory("Hoodies")}>HOODIES</a>
                   <a href="#products" className="category-tile" onClick={() => setCategory("Jeans")}>JEANS</a>
                   <a href="#products" className="category-tile" onClick={() => setCategory("Joggers")}>JOGGERS</a>
+                  <a href="#products" className="category-tile" onClick={() => setCategory("Quarter Zips")}>QUARTER ZIPS</a>
                 </div>
 
                 <h2 className="section-title" id="products">{category === "All" ? "Featured Products" : category.toUpperCase()}</h2>
