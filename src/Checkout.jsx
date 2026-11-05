@@ -7,10 +7,10 @@ function Checkout(props) {                                                     /
     const [address, setAddress] = useState("");
 
     function placeOrder() {
-        fetch(API_URL + "/orders", {                         // Fetch (....) sends a request to the address in the brackets
+        fetch(API_URL + "/orders", {                                    // Fetch (....) sends a request to the address in the brackets
             method: "POST",                                             // Says we are sending information, not asking for a page
             headers: { "Content-Type": "application/json" },            // tells the backend the information is written as JSON
-            body: JSON.stringify({                                      // Is the information itself, packed into text: customer;s details, the basket and the total
+            body: JSON.stringify({                                      // Is the information itself, packed into text: customer's details, the basket and the total
                 name: name,
                 email: email,
                 address: address,
