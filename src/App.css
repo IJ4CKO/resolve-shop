@@ -409,3 +409,44 @@ scroll-behavior: smooth; }
   background: var(--text-colour);
   color: white;
 }
+
+/* keeps the page in a centred column, and styles the password box*/
+.orders-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.orders-page input {
+  padding: 12px;
+  border: 1px solid var(--secondary-colour);
+  border-radius: 8px;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+/*lets the table scroll sideways on a small screen, so it never pushes the whole page wider.*/
+.orders-scroll {
+  overflow-x: auto;
+  margin-top: 24px;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/*makes the heading row near-black with white text.*/
+.orders-table th {
+  background: var(--text-colour);
+  color: white;
+  text-align: left;
+  padding: 12px;
+}
+
+/*gives each cell space, and a thin line under each row,
+ and vertical-align: top keeps the items list lined up with the rest of the row.*/
+.orders-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e2;
+  vertical-align: top;
+}
