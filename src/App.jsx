@@ -76,10 +76,15 @@ function ProductCard(props) {
 }
 
 function App() {
-  //basket is the list of items the customer has chosen so far
-  //setBasket is the function used to replace the basket with a new one, and tells React to redraw the page
-  //useState([]) starts as an empty array because the basket starts as empty and holds a list of products.
-  const [basket, setBasket] = useState([]);
+
+  const [basket, setBasket] = useState(() => {
+    try {
+      const saved = localStorage.getItem("basket");   //localStorage is a small store that can survive refreshes. Only holding text.
+      return saved ? JSON.parse(saved) : [];          //JSON.parse turns it back into a list.
+    } catch {
+      return [];
+    }
+  });
 
   //message shows the words to show and setMessage changes the message. useState("") starts as an empty string.
   const [message, setMessage] = useState("");
@@ -96,6 +101,11 @@ function App() {
     // If a new message arrives first, cancel the old timer
     return () => clearTimeout(timer);
   }, [message]);
+
+  // Whenever the basket changes, save a copy in the browser.
+  useEffect(() => {
+    localStorage.setItem("basket", JSON.stringify(basket));   // JSON.stringify turns the basket into text.
+  }, [basket]);
 
   // the 0 at the end of .reduce() is the starting value of the running total.
   const totalItems = basket.reduce((sum, item) => sum + item.quantity, 0);

@@ -1,4 +1,5 @@
 import { useState } from "react";                                       // brings the memory tool into the file.
+import { Link } from "react-router-dom";
 const API_URL = import.meta.env.VITE_API_URL;                           // stores the web address in a constant called API_URL                         
 
 function Checkout(props) {                                                     // starts the component and gives it its name.
@@ -19,6 +20,17 @@ function Checkout(props) {                                                     /
             })
         });
     }
+
+    if (props.basket.length === 0) {
+        return (
+            <section className="checkout">
+                <h2>Checkout</h2>
+                <p>Your basket is empty.</p>
+                <Link to="/">Continue shopping</Link>
+            </section>
+        );
+    }
+
     return (                                                              // says "show what's in the brackets". 
         <section className="checkout">                                    {/* is a box that holds the page's content */}
             <h2>Checkout</h2>                                             {/* is a heading with the word Checkout */}
