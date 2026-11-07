@@ -26,18 +26,18 @@ const products = [
   { id: 16, name: "Joggers", category: "Joggers", colour: "Black", price: 35, image: "/Joggers/joggers-black.png" },
   { id: 17, name: "Joggers", category: "Joggers", colour: "Light Grey", price: 35, image: "/Joggers/joggers-lightgrey.png" },
   { id: 18, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 35, image: "/Joggers/joggers-navyblue.png" },
-  { id: 19, name: "Quarter Zips", category: "Quarter Zips", colour: "Black", price: 30, image: "/Quarter Zip/quarter-zip-black.png" },
-  { id: 20, name: "Quarter Zips", category: "Quarter Zips", colour: "Burgundy", price: 30, image: "/Quarter Zip/quarter-zip-burgundy.png" },
-  { id: 21, name: "Quarter Zips", category: "Quarter Zips", colour: "Light Grey", price: 30, image: "/Quarter Zip/quarter-zip-lightgrey.png" },
-  { id: 22, name: "Quarter Zips", category: "Quarter Zips", colour: "Royal Blue", price: 30, image: "/Quarter Zip/quarter-zip-royalblue.png" },
-  { id: 23, name: "Quarter Zips", category: "Quarter Zips", colour: "White", price: 30, image: "/Quarter Zip/quarter-zip-white.png" },
-  { id: 24, name: "Quarter Zips", category: "Quarter Zips", colour: "Cream", price: 30, image: "/Quarter Zip/quarter-zip-cream.png" },
-  { id: 25, name: "Polo Shirts", category: "Polo Shirts", colour: "Black", price: 40, image: "/Polo Shirts/poloshirt-black.png" },
-  { id: 26, name: "Polo Shirts", category: "Polo Shirts", colour: "Burgundy", price: 40, image: "/Polo Shirts/poloshirt-burgundy.png" },
-  { id: 27, name: "Polo Shirts", category: "Polo Shirts", colour: "Cream", price: 40, image: "/Polo Shirts/poloshirt-cream.png" },
-  { id: 28, name: "Polo Shirts", category: "Polo Shirts", colour: "Light Grey", price: 40, image: "/Polo Shirts/poloshirt-lightgrey.png" },
-  { id: 29, name: "Polo Shirts", category: "Polo Shirts", colour: "Royal Blue", price: 40, image: "/Polo Shirts/poloshirt-royalblue.png" },
-  { id: 30, name: "Polo Shirts", category: "Polo Shirts", colour: "White", price: 40, image: "/Polo Shirts/poloshirt-white.png" }  
+  { id: 19, name: "Quarter Zip", category: "Quarter Zips", colour: "Black", price: 30, image: "/Quarter Zip/quarter-zip-black.png" },
+  { id: 20, name: "Quarter Zip", category: "Quarter Zips", colour: "Burgundy", price: 30, image: "/Quarter Zip/quarter-zip-burgundy.png" },
+  { id: 21, name: "Quarter Zip", category: "Quarter Zips", colour: "Light Grey", price: 30, image: "/Quarter Zip/quarter-zip-lightgrey.png" },
+  { id: 22, name: "Quarter Zip", category: "Quarter Zips", colour: "Royal Blue", price: 30, image: "/Quarter Zip/quarter-zip-royalblue.png" },
+  { id: 23, name: "Quarter Zip", category: "Quarter Zips", colour: "White", price: 30, image: "/Quarter Zip/quarter-zip-white.png" },
+  { id: 24, name: "Quarter Zip", category: "Quarter Zips", colour: "Cream", price: 30, image: "/Quarter Zip/quarter-zip-cream.png" },
+  { id: 25, name: "Polo Shirt", category: "Polo Shirts", colour: "Black", price: 40, image: "/Polo Shirts/poloshirt-black.png" },
+  { id: 26, name: "Polo Shirt", category: "Polo Shirts", colour: "Burgundy", price: 40, image: "/Polo Shirts/poloshirt-burgundy.png" },
+  { id: 27, name: "Polo Shirt", category: "Polo Shirts", colour: "Cream", price: 40, image: "/Polo Shirts/poloshirt-cream.png" },
+  { id: 28, name: "Polo Shirt", category: "Polo Shirts", colour: "Light Grey", price: 40, image: "/Polo Shirts/poloshirt-lightgrey.png" },
+  { id: 29, name: "Polo Shirt", category: "Polo Shirts", colour: "Royal Blue", price: 40, image: "/Polo Shirts/poloshirt-royalblue.png" },
+  { id: 30, name: "Polo Shirt", category: "Polo Shirts", colour: "White", price: 40, image: "/Polo Shirts/poloshirt-white.png" }  
 ];
 
 //Props are how information is passed from a parent component to a child component
@@ -99,7 +99,7 @@ function App() {
     }, 2000);
 
     // If a new message arrives first, cancel the old timer
-    return () => clearTimeout(timer);
+    return () => clearTimeout(timer);T
   }, [message]);
 
   // Whenever the basket changes, save a copy in the browser.
