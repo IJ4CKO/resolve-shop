@@ -76,6 +76,71 @@ app.get("/db-test", async (req, res) => {
     }
 });
 
+// GET /products: when someone asks for /products, this sends back every product that is on
+// sale, each with its colours, and each colour with its sizes and stock.
+app.get("/products", async (req, res) => {
+    // try means "attempt this". If anything goes wrong, the code jumps down to catch.
+    try {
+        // Ask the database for one flat row for every variant, joined to its product.
+        // JOIN matches each variant's product_id to a product's id.
+        // WHERE p.active = TRUE leaves out products that have been hidden.
+        // ORDER BY keeps the rows in a steady order each time.
+        const result = await pool.query(`
+            SELECT
+              p.id AS product_id, p.name, p.category, p.base_price,
+              v.id AS variant_id, v.colour, v.size, v.image, v.stock
+            FROM products p
+            JOIN variants v ON v.product_id = p.id
+            WHERE p.active = TRUE
+            ORDER BY p.id, v.colour, v.id
+        `);
+
+        // This will hold the finished answer: a list of products.
+        const products = [];
+
+        // Go through the flat rows one at a time.
+        for (const row of result.rows) {
+            // Step 1: find this row's product in our list. A hoodie has 30 rows, so most of
+            // the time it will already be there. If it isn't, create it and add it.
+            let product = products.find((p) => p.id === row.product_id);
+            if (!product) {
+                product = {
+                    id: row.product_id,
+                    name: row.name,
+                    category: row.category,
+                    // Postgres sends prices as text ("40.00"), so Number() makes it a real number.
+                    price: Number(row.base_price),
+                    colours: []
+                };
+                products.push(product);
+            }
+
+            // Step 2: find this row's colour inside that product, or create it. The colour
+            // holds the photo, and a list of sizes that we fill in next.
+            let colour = product.colours.find((c) => c.colour === row.colour);
+            if (!colour) {
+                colour = { colour: row.colour, image: row.image, sizes: [] };
+                product.colours.push(colour);
+            }
+
+            // Step 3: add this row's size to the colour. The variantId is what the basket and
+            // checkout will use later, so the server can look up the real price and stock.
+            colour.sizes.push({
+                variantId: row.variant_id,
+                size: row.size,
+                stock: row.stock
+            });
+        }
+
+        // Send the finished list back to whoever asked, as JSON.
+        res.json(products);
+    } catch (error) {
+        // If something failed, print it in the backend terminal and tell the website.
+        // 500 is the standard code for "the server had a problem".
+        console.log(error);
+        res.status(500).json({ message: "Could not load the products" });
+    }
+});
 
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 

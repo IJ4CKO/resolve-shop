@@ -22,6 +22,10 @@ const catalogue = [
     colours: ["Black", "Burgundy", "Cream", "Light Grey", "Royal Blue", "White"] }
 ];
 
+
+//The seed makes 150 variants from 6 products because it loops over each product, then each of its colours, 
+// then each of the 5 sizes, and inserts one variant for each combination. Each one starts with 20 in stock,
+// so the Black Hoodie in M and the White Hoodie in M are counted separately.
 async function seed() {
     // Stop if product already exists, so running it twice doesn't duplicate everything.
     const existing = await pool.query("SELECT COUNT(*) FROM products");
