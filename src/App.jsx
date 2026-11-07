@@ -7,6 +7,8 @@ import Checkout from "./Checkout.jsx";
 import Orders from "./Orders.jsx";
 import { IoBagOutline } from "react-icons/io5";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const products = [
   { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "Black", price: 20, image: "/T-shirt/tshirt-black.png" },
   { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Burgundy", price: 20, image: "/T-shirt/tshirt-burgundy.png" },
@@ -86,8 +88,12 @@ function App() {
     }
   });
 
+    // The catalogue loaded from the backend. It starts empty and fills in when the answer arrives.
+  const [catalogue, setCatalogue] = useState([]);
+
   //message shows the words to show and setMessage changes the message. useState("") starts as an empty string.
   const [message, setMessage] = useState("");
+
 
   // When the message changes, wait 2 seconds to clear it.
   useEffect(() => {
@@ -99,8 +105,17 @@ function App() {
     }, 2000);
 
     // If a new message arrives first, cancel the old timer
-    return () => clearTimeout(timer);T
+    return () => clearTimeout(timer);
   }, [message]);
+
+  // Runs once when the page first loads: ask the backend for the products.
+  useEffect(() => {
+    fetch(API_URL + "/products")
+      .then((response) => response.json())
+      .then((data) => setCatalogue(data));
+  }, [])
+
+  console.log(catalogue);
 
   // Whenever the basket changes, save a copy in the browser.
   useEffect(() => {
