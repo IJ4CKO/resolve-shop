@@ -9,70 +9,41 @@ import { IoBagOutline } from "react-icons/io5";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const products = [
-  { id: 1, name: "T-Shirt", category: "T-Shirts", colour: "Black", price: 20, image: "/T-shirt/tshirt-black.png" },
-  { id: 2, name: "T-Shirt", category: "T-Shirts", colour: "Burgundy", price: 20, image: "/T-shirt/tshirt-burgundy.png" },
-  { id: 3, name: "T-Shirt", category: "T-Shirts", colour: "Cream", price: 20, image: "/T-shirt/tshirt-cream.png" },
-  { id: 4, name: "T-Shirt", category: "T-Shirts", colour: "Light Grey", price: 20, image: "/T-shirt/tshirt-lightgrey.png" },
-  { id: 5, name: "T-Shirt", category: "T-Shirts", colour: "Royal Blue", price: 20, image: "/T-shirt/tshirt-royalblue.png" },
-  { id: 6, name: "T-Shirt", category: "T-Shirts", colour: "White", price: 20, image: "/T-shirt/tshirt-white.png" },
-  { id: 7, name: "Hoodie", category: "Hoodies", colour: "Black", price: 40, image: "/Hoodie/hoodie-black.webp" },
-  { id: 8, name: "Hoodie", category: "Hoodies", colour: "Burgundy", price: 40, image: "/Hoodie/hoodie-burgundy.webp" },
-  { id: 9, name: "Hoodie", category: "Hoodies", colour: "Cream", price: 40, image: "/Hoodie/hoodie-cream.webp" },
-  { id: 10, name: "Hoodie", category: "Hoodies", colour: "Light Grey", price: 40, image: "/Hoodie/hoodie-lightgrey.webp" },
-  { id: 11, name: "Hoodie", category: "Hoodies", colour: "Royal Blue", price: 40, image: "/Hoodie/hoodie-royalblue.webp" },
-  { id: 12, name: "Hoodie", category: "Hoodies", colour: "White", price: 40, image: "/Hoodie/hoodie-white.webp" },
-  { id: 13, name: "Jeans", category: "Jeans", colour: "Blue", price: 45, image: "/Jeans/Jeans-blue.png" },
-  { id: 14, name: "Jeans", category: "Jeans", colour: "Light Grey", price: 45, image: "/Jeans/Jeans-lightgrey.png" },
-  { id: 15, name: "Jeans", category: "Jeans", colour: "Dark Grey", price: 45, image: "/Jeans/Jeans-darkgrey.png" },
-  { id: 16, name: "Joggers", category: "Joggers", colour: "Black", price: 35, image: "/Joggers/joggers-black.png" },
-  { id: 17, name: "Joggers", category: "Joggers", colour: "Light Grey", price: 35, image: "/Joggers/joggers-lightgrey.png" },
-  { id: 18, name: "Joggers", category: "Joggers", colour: "Navy Blue", price: 35, image: "/Joggers/joggers-navyblue.png" },
-  { id: 19, name: "Quarter Zip", category: "Quarter Zips", colour: "Black", price: 30, image: "/Quarter Zip/quarter-zip-black.png" },
-  { id: 20, name: "Quarter Zip", category: "Quarter Zips", colour: "Burgundy", price: 30, image: "/Quarter Zip/quarter-zip-burgundy.png" },
-  { id: 21, name: "Quarter Zip", category: "Quarter Zips", colour: "Light Grey", price: 30, image: "/Quarter Zip/quarter-zip-lightgrey.png" },
-  { id: 22, name: "Quarter Zip", category: "Quarter Zips", colour: "Royal Blue", price: 30, image: "/Quarter Zip/quarter-zip-royalblue.png" },
-  { id: 23, name: "Quarter Zip", category: "Quarter Zips", colour: "White", price: 30, image: "/Quarter Zip/quarter-zip-white.png" },
-  { id: 24, name: "Quarter Zip", category: "Quarter Zips", colour: "Cream", price: 30, image: "/Quarter Zip/quarter-zip-cream.png" },
-  { id: 25, name: "Polo Shirt", category: "Polo Shirts", colour: "Black", price: 40, image: "/Polo Shirts/poloshirt-black.png" },
-  { id: 26, name: "Polo Shirt", category: "Polo Shirts", colour: "Burgundy", price: 40, image: "/Polo Shirts/poloshirt-burgundy.png" },
-  { id: 27, name: "Polo Shirt", category: "Polo Shirts", colour: "Cream", price: 40, image: "/Polo Shirts/poloshirt-cream.png" },
-  { id: 28, name: "Polo Shirt", category: "Polo Shirts", colour: "Light Grey", price: 40, image: "/Polo Shirts/poloshirt-lightgrey.png" },
-  { id: 29, name: "Polo Shirt", category: "Polo Shirts", colour: "Royal Blue", price: 40, image: "/Polo Shirts/poloshirt-royalblue.png" },
-  { id: 30, name: "Polo Shirt", category: "Polo Shirts", colour: "White", price: 40, image: "/Polo Shirts/poloshirt-white.png" }  
-];
-
-//Props are how information is passed from a parent component to a child component
-//ProductCard shows the name of the clothing piece and the price of it. It is also a reusable card,
-// so every product is laid out the same way.
 function ProductCard(props) {
-
+  // The card receives the product (name, price) and one colour of it (photo and sizes).
+  const product = props.product;
+  const colour = props.colour;
   const [size, setSize] = useState("");
-  const sizes = ["S", "M", "L", "XL", "XXL"];
+
+  // The size row the customer picked, so we can read its variantId and stock.
+  const chosen = colour.sizes.find((s) => s.size === size);
 
   return (
     <div className="product-card">
-      <img src={props.image} alt={props.name} />
-      <h2>{props.name}</h2>
-      <p className="product-colour">{props.colour}</p>
-      <p className="product-price">£{props.price}</p>
+      <img src={colour.image} alt={product.name} />
+      <h2>{product.name}</h2>
+      <p className="product-colour">{colour.colour}</p>
+      <p className="product-price">£{product.price}</p>
 
-      {/* .map() makes one small button for each size. Clicking it stores it with setSize. The one that matches the stored size gets an extra class, selected, so it looks different */}
       <div className="size-options">
-        {sizes.map((s) => (
+        {colour.sizes.map((s) => (
           <button
-          key={s}
-          className={size === s ? "size-button selected" : "size-button"}
-          onClick={() => setSize(s)}
+            key={s.variantId}
+            disabled={s.stock === 0}
+            className={size === s.size ? "size-button selected" : "size-button"}
+            onClick={() => setSize(s.size)}
           >
-            {s}
+            {s.size}
           </button>
         ))}
       </div>
 
-      {/* When the button is clicked, it calls onAdd (addToBasket from App)
-        and it passes the product and size. disabled greys out the button until a size has been picked.*/}
-      <button disabled={size === ""} onClick={() => props.onAdd(props.product, size)}>Add to Basket</button>
+      <button
+        disabled={!chosen}
+        onClick={() => props.onAdd({ id: chosen.variantId, name: product.name, category: product.category, colour: colour.colour, price: product.price, image: colour.image }, size)}
+      >
+        Add to Basket
+      </button>
     </div>
   );
 }
@@ -88,7 +59,7 @@ function App() {
     }
   });
 
-    // The catalogue loaded from the backend. It starts empty and fills in when the answer arrives.
+  // The catalogue loaded from the backend. It starts empty and fills in when the answer arrives.
   const [catalogue, setCatalogue] = useState([]);
 
   //message shows the words to show and setMessage changes the message. useState("") starts as an empty string.
@@ -114,8 +85,6 @@ function App() {
       .then((response) => response.json())
       .then((data) => setCatalogue(data));
   }, [])
-
-  console.log(catalogue);
 
   // Whenever the basket changes, save a copy in the browser.
   useEffect(() => {
@@ -176,13 +145,35 @@ function App() {
   // All means no filter has been applied yet
   const [category, setCategory] = useState("All");
 
-  const shownProducts =
-    category === "All" ? products : products.filter((product) => product.category === category);
+  // One entry for every colour of every product: 30 in total.
+  const items = catalogue.flatMap((p) => p.colours.map((c) => ({ product: p, colour: c })));
 
-    const featuredProducts = [1, 8, 13, 17, 22, 27].map((id) => products.find((product) => product.id === id));
+  // Items matching the chosen category.
+  const shownItems = category === "All" ? items : items.filter((item) => item.product.category === category);
 
-    const gridProducts = category === "All" ? featuredProducts : shownProducts;
 
+  // Which colour of each product to feature on the home page.
+const featuredPicks = [
+  { name: "T-Shirt", colour: "Royal Blue" },
+  { name: "Hoodie", colour: "Burgundy" },
+  { name: "Jeans", colour: "Blue" },
+  { name: "Joggers", colour: "Navy Blue" },
+  { name: "Quarter Zip", colour: "Cream" },
+  { name: "Polo Shirt", colour: "White" }
+];
+
+// Find each product and the chosen colour inside it. filter(Boolean) drops any pair that wasn't found,
+// for example if a product is hidden or renamed.
+const featuredItems = featuredPicks
+  .map((pick) => {
+    const product = catalogue.find((p) => p.name === pick.name);
+    const colour = product && product.colours.find((c) => c.colour === pick.colour);
+    return product && colour ? { product, colour } : null;
+  })
+  .filter(Boolean);
+
+  // The home page shows the featured row. Choosing a category shows all of that category's colours.
+const gridItems = category === "All" ? featuredItems : shownItems;
   return (
     <div>
       <nav className="navbar">
@@ -235,10 +226,9 @@ function App() {
                 <ul className="product-grid">
                   {/* .map() repeats what is inside it for each product. 
                   key gives each item a unique label so React can tell them apart*/}
-                  {gridProducts.map((product) => (
-                    <li key={product.id}>
-                      {/* hands the card its name, price, the whole product and onAdd (the addToBasket function)*/}
-                      <ProductCard name={product.name} price={product.price} onAdd={addToBasket} product={product} image={product.image} colour={product.colour} />
+                  {gridItems.map((item) => (
+                    <li key={item.product.id + item.colour.colour}>
+                      <ProductCard product={item.product} colour={item.colour} onAdd={addToBasket} />
                     </li>
                   ))}
                 </ul>
