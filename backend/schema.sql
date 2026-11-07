@@ -30,3 +30,15 @@ CREATE TABLE IF NOT EXISTS products (
   stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
   UNIQUE (product_id, colour, size)
 );
+
+-- email: the login name, it must be unique
+--password_hash: the scrambled password, never the real one
+--role: either admin or customer. It defualts to customer, so a new sign-up has no special powers,
+--unless someone deliberatley makes them an admin
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('admin', 'customer')),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
