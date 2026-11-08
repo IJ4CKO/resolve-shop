@@ -1,21 +1,21 @@
 import express from "express";
 import cors from "cors";
 // Reads env file as soon as the backend starts
-import "dotenv/config";                                               
+import "dotenv/config";
 import pg from "pg";
 
 // server named app
-const app = express();   
+const app = express();
 
 // creates the set of connections, using the string from .env
-const pool = new pg.Pool({                                              
-    connectionString: process.env.DATABASE_URL 
+const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL
 });
 // lets the website talk to it 
-app.use(cors());  
+app.use(cors());
 
 // lets it read information sent to it in a standard format called JSON, needed for orders                                                      
-app.use(express.json());  
+app.use(express.json());
 
 // Checks an incoming order and returns a list of problems. An empty list means it is fine.
 function validateOrder(body) {
@@ -48,17 +48,70 @@ function validateOrder(body) {
 }
 
 // when somone asks for the address /hello, the answer will be the backend is working
-app.get("/hello", (req, res) => { 
-    res.send("The backend is working")                                      
+app.get("/hello", (req, res) => {
+    res.send("The backend is working")
 });
 
-// POST /orders: for now it only validates, and does not save anything.
+// POST /orders: validates the order, then looks up every variant in the database and works out the total on the server
+// It does not save anything yet
 app.post("/orders", async (req, res) => {
     const errors = validateOrder(req.body);
     if (errors.length > 0) {
         return res.status(400).json({ errors });
     }
-    res.json({ message: "Order looks valid (nothing saved yet)"});
+
+    try {
+        const items = req.body.items;
+
+        // 1. Fetch every variant in the order, with its product, in one query.
+        const variantIds = items.map((item) => item.variantId);
+        const result = await pool.query(
+            `SELECT v.id, v.colour, v.size, v.stock, p.name, p.base_price
+            FROM variants v
+            JOIN products p ON p.id = v.product_id
+            WHERE v.id = ANY($1) AND p.active = TRUE`,
+            [variantIds]
+        );
+
+        // 2. Make a lookup so we can find a variant by its id.
+        const found = {};
+        for (const row of result.rows) {
+            found[row.id] = row;
+        }
+
+        // 3. Build each order line, using the PRICE FROM THE DATABASE, never from the browser.
+        const lines = [];
+        const problems = [];
+        let total = 0;
+
+        for (const item of items) {
+            const variant = found[item.variantId];
+            if (!variant) {
+                problems.push("Item " + item.variantId + " is not available");
+                continue;
+            }
+
+            const unitPrice = Number(variant.base_price);
+            lines.push({
+                variantId: variant.id,
+                name: variant.name,
+                colour: variant.colour,
+                size: variant.size,
+                unitPrice: unitPrice,
+                quantity: item.quantity
+            });
+            total += unitPrice * item.quantity;
+        }
+
+        if (problems.length > 0) {
+            return res.status(400).json({ errors: problems });
+        }
+
+        res.json({ lines, total });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not process the order" });
+    }
 });
 
 // When someone asks for /orders, send back every saved order, newest first.
@@ -79,19 +132,19 @@ app.get("/orders", async (req, res) => {
 
 // when visiting /db-test run this code. async means the function has to wait for the database,
 //  so it can pause while it waits. req is the request that arrived and res is the response sent back
-app.get("/db-test", async (req, res) => {   
+app.get("/db-test", async (req, res) => {
     // attempt this code block. If anything goes wrong, jump to catch.                            
-    try {        
+    try {
         // Ask the database for the current time. await waits for the answer before moving on. The answer is stored in result                                                       
-         const result = await pool.query("SELECT NOW()");    
-         // The database answers with a list of rows. We send back the first one as JSON            
-         res.json(result.rows[0]);   
-    // Only returns if something in "try" failed, and "error" holds what went wrong                                       
-    } catch (error) {  
+        const result = await pool.query("SELECT NOW()");
+        // The database answers with a list of rows. We send back the first one as JSON            
+        res.json(result.rows[0]);
+        // Only returns if something in "try" failed, and "error" holds what went wrong                                       
+    } catch (error) {
         // Print the error in the backend terminal so we can see what happened                                                 
-        console.log(error); 
+        console.log(error);
         // Tell the website it failed. 500 is the standard code for "the server had a problem"                                    
-        res.status(500).send("Could not reach the database");           
+        res.status(500).send("Could not reach the database");
     }
 });
 
@@ -163,6 +216,6 @@ app.get("/products", async (req, res) => {
 
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
-app.listen(port, () => {                            
+app.listen(port, () => {
     console.log("Backend running on port " + port);
 })  
