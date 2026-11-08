@@ -11,6 +11,14 @@ const app = express();
 const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL
 });
+
+// Makes a readable order reference such as RES-20261108-A4F2
+function makeReference() {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return "RES-" + date + "-" + random;
+}
+
 // lets the website talk to it 
 app.use(cors());
 
@@ -53,7 +61,7 @@ app.get("/hello", (req, res) => {
 });
 
 // POST /orders: validates the order, then looks up every variant in the database and works out the total on the server
-// It does not save anything yet
+// It also saves the order, its lines and the stock change in one transaction.
 app.post("/orders", async (req, res) => {
     const errors = validateOrder(req.body);
     if (errors.length > 0) {
@@ -126,7 +134,48 @@ app.post("/orders", async (req, res) => {
             return res.status(400).json({ errors: problems });
         }
 
-        res.json({ lines, total });
+        // Save the order, its lines and the stock change together. If any step fails, nothing is kept.
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+
+            const reference = makeReference();
+            const orderResult = await client.query(
+                `INSERT INTO orders (reference, name, email, address, total)
+                 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total]
+            );
+            const orderId = orderResult.rows[0].id;
+
+            for (const line of lines) {
+                // Take the stock off. The AND stock >= $1 means it only works if enough is left.
+                const update = await client.query(
+                    "UPDATE variants SET stock = stock - $1 WHERE id = $2 AND stock >= $1",
+                    [line.quantity, line.variantId]
+                );
+                if (update.rowCount === 0) {
+                    // Someone else bought it first, so undo everything and refuse.
+                    await client.query("ROLLBACK");
+                    return res.status(409).json({ errors: [line.name + " " + line.colour + " (" + line.size + ") just sold out"] });
+                }
+
+                // Save the line, with the name and price copied at this moment.
+                await client.query(
+                    `INSERT INTO order_items (order_id, variant_id, name, colour, size, unit_price, quantity)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                    [orderId, line.variantId, line.name, line.colour, line.size, line.unitPrice, line.quantity]
+                );
+            }
+
+            await client.query("COMMIT");
+            res.status(201).json({ reference, total, lines });
+        } catch (error) {
+            await client.query("ROLLBACK");
+            throw error;
+        } finally {
+            client.release();
+        }
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Could not process the order" });
