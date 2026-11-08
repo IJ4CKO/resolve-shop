@@ -84,12 +84,31 @@ app.post("/orders", async (req, res) => {
         const problems = [];
         let total = 0;
 
+        // If the same variant appears twice, add the quantities together first.
+        const wanted = {};
         for (const item of items) {
-            const variant = found[item.variantId];
+            wanted[item.variantId] = (wanted[item.variantId] || 0) + item.quantity;
+        }
+
+        // Go through each different variant once, using the combined quantity.
+        for (const variantId of Object.keys(wanted)) {
+            const quantity = wanted[variantId];
+            const variant = found[variantId];
+
             if (!variant) {
-                problems.push("Item " + item.variantId + " is not available");
+                problems.push("Item " + variantId + " is not available");
                 continue;
             }
+
+            // Refuse the line if there isn't enough stock.
+            if (variant.stock < quantity) {
+                problems.push(
+                    variant.name + " " + variant.colour + " (" + variant.size + ") only has " + variant.stock + " left"
+                );
+                continue;
+            }
+
+
 
             const unitPrice = Number(variant.base_price);
             lines.push({
@@ -98,9 +117,9 @@ app.post("/orders", async (req, res) => {
                 colour: variant.colour,
                 size: variant.size,
                 unitPrice: unitPrice,
-                quantity: item.quantity
+                quantity: quantity
             });
-            total += unitPrice * item.quantity;
+            total += unitPrice * quantity;
         }
 
         if (problems.length > 0) {
