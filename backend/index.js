@@ -209,21 +209,36 @@ app.post("/orders", async (req, res) => {
     }
 });
 
-// When someone asks for /orders, send back every saved order, newest first.
+// GET /orders: for the admin page. Sends back every order, newest first, each with its lines.
 app.get("/orders", async (req, res) => {
     // Only carry on if the password sent with the request matches the admin password
     if (req.headers["x-admin-password"] !== process.env.ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Wrong password" });
     }
     try {
-        const result = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
-        res.json(result.rows);
+        // 1. All the orders, newest first.
+        const ordersResult = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+        const orders = ordersResult.rows;
+
+        // 2. All the lines that belong to those orders, in one query.
+        const orderIds = orders.map((order) => order.id);
+        const itemsResult = await pool.query(
+            "SELECT * FROM order_items WHERE order_id = ANY($1) ORDER BY id",
+            [orderIds]
+        );
+
+        // 3. Give each order its own lines.
+        const withItems = orders.map((order) => ({
+            ...order,
+            items: itemsResult.rows.filter((item) => item.order_id === order.id)
+        }));
+
+        res.json(withItems);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Could not load the orders" });
     }
 });
-
 
 // when visiting /db-test run this code. async means the function has to wait for the database,
 //  so it can pause while it waits. req is the request that arrived and res is the response sent back
