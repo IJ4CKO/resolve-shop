@@ -3,6 +3,8 @@ import cors from "cors";
 // Reads env file as soon as the backend starts
 import "dotenv/config";
 import pg from "pg";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // server named app
 const app = express();
@@ -324,8 +326,48 @@ app.get("/products", async (req, res) => {
     }
 });
 
+// POST /auth/login: checks an email and password, and sends back a signed token.
+app.post("/auth/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    // Reject anything that isn't text, so odd data can't crash the checks below.
+    if (typeof email !== "string" || typeof password !== "string") {
+        return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    try {
+        // 1. Find the user by email.
+        const result = await pool.query(
+            "SELECT id, email, password_hash, role FROM users WHERE email = $1",
+            [email.trim().toLowerCase()]
+        );
+        const user = result.rows[0];
+
+        // 2. Compare what was typed with the stored hash. If there is no such user, the answer is the same.
+        const matches = user ? await bcrypt.compare(password, user.password_hash) : false;
+        if (!matches) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // 3. Sign a token that says who this is and what role they have. It expires in 8 hours.
+        const token = jwt.sign(
+            { id: user.id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "8h" }
+
+        );
+
+        res.json({ token, role: user.role, email: user.email });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not log in" });
+    }
+});
+
+
+
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
 app.listen(port, () => {
     console.log("Backend running on port " + port);
-})  
+});
