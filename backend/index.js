@@ -51,6 +51,9 @@ function validateOrder(body) {
             }
         }
     }
+    if (!body.idempotencyKey || typeof body.idempotencyKey !== "string" || body.idempotencyKey.length < 8) {
+        errors.push("An idempotencyKey is required");
+    }
 
     return errors;
 }
@@ -70,6 +73,20 @@ app.post("/orders", async (req, res) => {
 
     try {
         const items = req.body.items;
+        const idempotencyKey = req.body.idempotencyKey;
+
+        // If we have already saved an order with this key, return it and stop. Nothing is charged twice.
+        const existing = await pool.query(
+            "SELECT reference, total FROM orders WHERE idempotency_key = $1",
+            [req.body.idempotencyKey]
+        );
+        if (existing.rows.length > 0) {
+            return res.status(200).json({
+                reference: existing.rows[0].reference,
+                total: Number(existing.rows[0].total),
+                duplicate: true
+            });
+        }
 
         // 1. Fetch every variant in the order, with its product, in one query.
         const variantIds = items.map((item) => item.variantId);
@@ -141,9 +158,9 @@ app.post("/orders", async (req, res) => {
 
             const reference = makeReference();
             const orderResult = await client.query(
-                `INSERT INTO orders (reference, name, email, address, total)
-                 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total]
+                `INSERT INTO orders (reference, name, email, address, total, idempotency_key)
+                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total, idempotencyKey]
             );
             const orderId = orderResult.rows[0].id;
 
@@ -171,6 +188,16 @@ app.post("/orders", async (req, res) => {
             res.status(201).json({ reference, total, lines });
         } catch (error) {
             await client.query("ROLLBACK");
+            // Two identical requests arrived at once, and the other one won. Return its order.
+            if (error.code === "23505") {
+                const again = await pool.query(
+                    "SELECT reference, total FROM orders WHERE idempotency_key = $1",
+                    [req.body.idempotencyKey]
+                );
+                if (again.rows.length > 0) {
+                    return res.status(200).json({ reference: again.rows[0].reference, total: Number(again.rows[0].total), duplicate: true });
+                }
+            }
             throw error;
         } finally {
             client.release();

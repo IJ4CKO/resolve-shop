@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE orders (
   id SERIAL PRIMARY KEY,
   reference TEXT NOT NULL UNIQUE,
+  idempotency_key TEXT UNIQUE,
   user_id INTEGER REFERENCES users(id),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
@@ -83,3 +84,6 @@ CREATE TABLE order_items (
     unit_price NUMERIC(10,2) NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0)
 );
+
+-- Adds an extra optional text column, and UNIQUE means no two orders can have the same key
+ALTER TABLE orders ADD column idempotency_key TEXT UNIQUE;
