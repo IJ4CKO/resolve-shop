@@ -27,7 +27,7 @@ function Orders() {
                 return response.json();
             })
             .then((data) => {
-                // Only store the ortders if we actually received some
+                // Only store the orders if we actually received some
                 if (data) {
                     setOrders(data);
                 }
@@ -53,54 +53,57 @@ function Orders() {
             )}
 
             {orders.length > 0 && (
-            <div className="orders-scroll">
-                {/* <table> is the whole grid */}
-                <table className="orders-table">
-                    {/* <thead> is the heading part */}
-                    <thead>
-                        {/* <tr> is one row */}
-                        <tr>
-                            {/* <th> is one heading cell */}
-                            <th>Order</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Address</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    {/* <tbody> is the part holding the data */}
-                    <tbody>
-                        {/* Each order has a list of items stored inside it. I use .map() to go through the orders
-                     ,and inside each one I use a second .map() to go through its items. */}
-                        {/* orders.map goes through the list of orders and makes one row for each */}
-                        {orders.map((order) => (
-                            // key={order.id} gives each row its own label, so React can tell them apart
-                            <tr key={order.id}>
-                                {/* <td> is one cell in that row */}
-                                <td>{order.id}</td>
-                                <td>{order.name}</td>
-                                <td>{order.email}</td>
-                                <td>{order.address}</td>
-                                <td>
-                                    {/* order.items.map(....) goes through the items in this order */}
-                                    {order.items.map((item) => (
-                                        // key={item.id} gives each line its own label
-                                        <div key={item.id}>
-                                            {item.name} {item.colour} ({item.size}) x {item.quantity}
-                                        </div>
-                                    ))}
-                                </td>
-                                <td>£{order.total}</td>
+                <div className="orders-scroll">
+                    {/* <table> is the whole grid */}
+                    <table className="orders-table">
+                        {/* <thead> is the heading part */}
+                        <thead>
+                            {/* <tr> is one row */}
+                            <tr>
+                                {/* <th> is one heading cell */}
+                                <th>Reference</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th>Total</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div >
+                        </thead>
+                        {/* <tbody> is the part holding the data */}
+                        <tbody>
+                            {/* The backend attaches each order's lines, which are saved in their own table
+                        . I use .map() to go through the orders.
+                        ,and inside each one I use a second .map() to go through its items. */}
+                            {/* orders.map goes through the list of orders and makes one row for each */}
+                            {orders.map((order) => (
+                                // key={order.id} gives each row its own label, so React can tell them apart
+                                <tr key={order.id}>
+                                    {/* <td> is one cell in that row */}
+                                    <td>{order.reference}</td>
+                                    <td>{order.name}</td>
+                                    <td>{order.email}</td>
+                                    <td>{order.address}</td>
+                                    <td>
+                                        {/* order.items.map(....) goes through the items in this order */}
+                                        {order.items.map((item) => (
+                                            // key={item.id} gives each line its own label
+                                            <div key={item.id}>
+                                                {item.name} {item.colour} ({item.size}) x {item.quantity}
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td>{order.status}</td>
+                                    <td>£{order.total}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div >
             )}
         </section >
 
     );
 }
 
-    export default Orders;
+export default Orders;

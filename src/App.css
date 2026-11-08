@@ -450,3 +450,7 @@ scroll-behavior: smooth; }
   border-bottom: 1px solid #e5e5e2;
   vertical-align: top;
 }
+
+ .checkout-errors { 
+  color: #b00020; padding-left: 20px; 
+}
