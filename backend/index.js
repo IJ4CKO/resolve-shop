@@ -17,29 +17,48 @@ app.use(cors());
 // lets it read information sent to it in a standard format called JSON, needed for orders                                                      
 app.use(express.json());  
 
+// Checks an incoming order and returns a list of problems. An empty list means it is fine.
+function validateOrder(body) {
+    const errors = [];
+
+    if (!body.name || body.name.trim() === "") {
+        errors.push("Name is required");
+    }
+    if (!body.email || !body.email.includes("@")) {
+        errors.push("A valid email is required");
+    }
+    if (!body.address || body.address.trim() === "") {
+        errors.push("Address is required");
+    }
+
+    if (!Array.isArray(body.items) || body.items.length === 0) {
+        errors.push("The order must contain at least one item");
+    } else {
+        for (const item of body.items) {
+            if (!Number.isInteger(item.variantId)) {
+                errors.push("Every item needs a variantId");
+            }
+            if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 10) {
+                errors.push("Quantity must be a whole number from 1 to 10");
+            }
+        }
+    }
+
+    return errors;
+}
+
 // when somone asks for the address /hello, the answer will be the backend is working
 app.get("/hello", (req, res) => { 
     res.send("The backend is working")                                      
 });
 
- // When someone sends an order to /orders, save it in the database
-app.post("/orders", async (req, res) => {                                     
-    try{
-        // Pull the details out of the request, so they can be used one by one
-        const {name, email, address, items, total } = req.body; 
-
-        // Add a new row to the orders table. The $1, $2... are blanks filled by the list below.
-        const result = await pool.query(
-            "INSERT INTO orders (name, email, address, items, total) VALUES ( $1, $2, $3, $4, $5) RETURNING id",
-            [name, email, address, JSON.stringify(items), total]
-        );
-        
-        // Send back the new order's number, so the website knows it worked.
-        res.json({ message: "Order saved", orderId: result.rows[0].id });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Could not save the order"});
+// POST /orders: for now it only validates, and does not save anything.
+app.post("/orders", async (req, res) => {
+    const errors = validateOrder(req.body);
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
     }
+    res.json({ message: "Order looks valid (nothing saved yet)"});
 });
 
 // When someone asks for /orders, send back every saved order, newest first.
