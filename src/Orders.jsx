@@ -1,50 +1,86 @@
-//When View Orders is pressed, loadOrders uses fetch to ask the backend for the orders. 
-// The backend reads them from the database and sends them back, and .map() turns each one into a table row.
-
-
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
 
 function Orders() {
     const [orders, setOrders] = useState([]);
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [token, setToken] = useState("");        // empty means "not logged in"
     const [message, setMessage] = useState("");
 
-    // Ask the backend for the orders, sending the password along as a header
-    function loadOrders() {
+    // Send the email and password. If they are right, keep the token and load the orders.
+    function login() {
+        setMessage("");
+        fetch(API_URL + "/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, password: password })
+        })
+            .then(async (response) => {
+                const data = await response.json();
+                if (!response.ok) {
+                    setMessage(data.message || "Could not log in");
+                    return;
+                }
+                if (data.role !== "admin") {
+                    setMessage("This account is not an admin");
+                    return;
+                }
+                setToken(data.token);
+                setPassword("");                    // don't keep the typed password around
+                loadOrders(data.token);
+            })
+            .catch(() => setMessage("Could not reach the shop"));
+    }
+
+    // Ask for the orders, sending the token. If the backend refuses it, log out.
+    function loadOrders(currentToken) {
         fetch(API_URL + "/orders", {
-            headers: { "x-admin-password": password }
+            headers: { Authorization: "Bearer " + currentToken }
         })
             .then((response) => {
-                // If the backend said no, show a message and stop here
                 if (!response.ok) {
-                    setMessage("Wrong password");
-                    setOrders([]);
+                    logout();
+                    setMessage("Your login is invalid or has expired. Please log in again.");
                     return null;
                 }
-                setMessage("");
                 return response.json();
             })
             .then((data) => {
-                // Only store the orders if we actually received some
-                if (data) {
-                    setOrders(data);
-                }
+                if (data) setOrders(data);
             });
     }
 
-
+    function logout() {
+        setToken("");
+        setOrders([]);
+        setEmail("");
+        setPassword("");
+        setMessage("");
+    }
     return (
         <section className="orders-page">
             <h2>Orders</h2>
-            <input
-                type="password"
-                placeholder="Admin password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={() => loadOrders()}>View orders</button>
+
+            {token === "" ? (
+                <div>
+                    <input
+                        type="email"
+                        placeholder="Admin email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button onClick={() => login()}>Log in</button>
+                </div>
+            ) : (
+                <button onClick={() => logout()}>Log out</button>
+            )}
             <p>{message}</p>
             {orders.length === 0 ? (
                 <p>Enter the admin password and press View orders</p>
