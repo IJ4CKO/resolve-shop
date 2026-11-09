@@ -21,6 +21,37 @@ function makeReference() {
     return "RES-" + date + "-" + random;
 }
 
+// requireAuth: reads the token from the request, checks it is genuine, and remembers who it is.
+function requireAuth(req, res, next) {
+    // The token arrives in a header that looks like: Authorization: Bearer eyJ...
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+
+    if (!token) {
+        return res.status(401).json({ message: "Please log in" });
+    }
+
+    try {
+        // Verify throws an error if the token was changed or has expired.
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = payload;         // now the route can read req.user.id and req.user.role
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: "Your login is invalid or has expired" });
+    }
+}
+
+// requireRole("admin"): only lets through users with that role.
+function requireRole(role) {
+    return function (req, res, next) {
+        if (req.user.role !== role) {
+            return res.status(403).json({ message: "You do not have permission to do that" });
+        }
+        next();
+    };
+}
+
+
 // lets the website talk to it 
 app.use(cors());
 
@@ -212,11 +243,7 @@ app.post("/orders", async (req, res) => {
 });
 
 // GET /orders: for the admin page. Sends back every order, newest first, each with its lines.
-app.get("/orders", async (req, res) => {
-    // Only carry on if the password sent with the request matches the admin password
-    if (req.headers["x-admin-password"] !== process.env.ADMIN_PASSWORD) {
-        return res.status(401).json({ message: "Wrong password" });
-    }
+app.get("/orders", requireAuth, requireRole("admin"), async (req, res) => {
     try {
         // 1. All the orders, newest first.
         const ordersResult = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
