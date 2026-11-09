@@ -583,6 +583,54 @@ app.patch("/admin/products/:id", requireAuth, requireRole("admin"), async (req, 
     }
 });
 
+// GET /admin/products: every product (hidden ones too), each with all its variants. Admin only.
+app.get("/admin/products", requireAuth, requireRole("admin"), async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT
+              p.id AS product_id, p.name, p.category, p.description, p.base_price, p.active,
+              v.id AS variant_id, v.colour, v.size, v.image, v.stock
+            FROM products p
+            LEFT JOIN variants v ON v.product_id = p.id
+            ORDER BY p.id, v.colour, v.id
+        `);
+
+        const products = [];
+
+        for (const row of result.rows) {
+            let product = products.find((p) => p.id === row.product_id);
+            if (!product) {
+                product = {
+                    id: row.product_id,
+                    name: row.name,
+                    category: row.category,
+                    description: row.description,
+                    price: Number(row.base_price),
+                    active: row.active,
+                    variants: []
+                };
+                products.push(product);
+            }
+
+            // A product with no variants gives one row where the variant columns are null. Skip adding it.
+            if (row.variant_id !== null) {
+                product.variants.push({
+                    id: row.variant_id,
+                    colour: row.colour,
+                    size: row.size,
+                    image: row.image,
+                    stock: row.stock
+                });
+            }
+        }
+
+        res.json(products);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not load the products" });
+    }
+});
+
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
 app.listen(port, () => {
