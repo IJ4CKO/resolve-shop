@@ -114,6 +114,28 @@ function validateProduct(body) {
     return errors;
 }
 
+const SIZES = ["S", "M", "L", "XL", "XXL"];
+
+// Checks a new variant and returns a list of problems. An empty list means it is fine.
+function validateVariant(body) {
+    const errors = [];
+
+    if (typeof body.colour !== "string" || body.colour.trim() === "") {
+        errors.push("Colour is required");
+    }
+    if (!SIZES.includes(body.size)) {
+        errors.push("Size must be one of: " + SIZES.join(", "));
+    }
+    if (!Number.isInteger(body.stock) || body.stock < 0) {
+        errors.push("Stock must be a whole number, zero or more");
+    }
+    if (typeof body.image !== "string" || body.image.trim() === "") {
+        errors.push("An image path is required");
+    }
+
+    return errors;
+}
+
 // when somone asks for the address /hello, the answer will be the backend is working
 app.get("/hello", (req, res) => {
     res.send("The backend is working")
@@ -431,6 +453,41 @@ app.post("/admin/products", requireAuth, requireRole("admin"), async (req, res) 
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Could not add the product" });
+    }
+});
+
+// POST /admin/products/:id/variants: adds one colour and size to a product, with its stock.
+app.post("/admin/products/:id/variants", requireAuth, requireRole("admin"), async (req, res) => {
+    const productId = Number(req.params.id);
+    if (!Number.isInteger(productId)) {
+        return res.status(400).json({ errors: ["The product id must be a number"] });
+    }
+
+    const errors = validateVariant(req.body);
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+
+    try {
+        // Make sure the product exists first, so the message is clear.
+        const product = await pool.query("SELECT id FROM products WHERE id = $1", [productId]);
+        if (product.rows.length === 0) {
+            return res.status(404).json({ errors: ["That product does not exist"] });
+        }
+
+        const result = await pool.query(
+            `INSERT INTO variants (product_id, colour, size, image, stock)
+             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [productId, req.body.colour.trim(), req.body.size, req.body.image.trim(), req.body.stock]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        // 23505 means this colour and size already exist for the product.
+        if (error.code === "23505") {
+            return res.status(409).json({ errors: ["That colour and size already exist for this product"] });
+        }
+        console.log(error);
+        res.status(500).json({ message: "Could not add the variant" });
     }
 });
 
