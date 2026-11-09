@@ -529,6 +529,60 @@ app.patch("/admin/variants/:id", requireAuth, requireRole("admin"), async (req, 
     }
 });
 
+// PATCH /admin/products/:id: changes a product's details, or hides/shows it with active.
+app.patch("/admin/products/:id", requireAuth, requireRole("admin"), async (req, res) => {
+    const productId = Number(req.params.id);
+    if (!Number.isInteger(productId)) {
+        return res.status(400).json({ errors: ["The product id must be a number"] });
+    }
+
+    const b = req.body;
+    const errors = [];
+
+    if (b.name !== undefined && (typeof b.name !== "string" || b.name.trim() === "")) {
+        errors.push("Name must be text");
+    }
+    if (b.category !== undefined && !CATEGORIES.includes(b.category)) {
+        errors.push("Category must be one of: " + CATEGORIES.join(", "));
+    }
+    if (b.basePrice !== undefined && (typeof b.basePrice !== "number" || b.basePrice <= 0)) {
+        errors.push("Price must be a number above 0");
+    }
+    if (b.description !== undefined && typeof b.description !== "string") {
+        errors.push("Description must be text");
+    }
+    if (b.active !== undefined && typeof b.active !== "boolean") {
+        errors.push("Active must be true or false");
+    }
+    if (Object.keys(b).length === 0) {
+        errors.push("Send at least one field to change");
+    }
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE products
+             SET name = COALESCE($1, name),
+                 category = COALESCE($2, category),
+                 base_price = COALESCE($3, base_price),
+                 description = COALESCE($4, description),
+                 active = COALESCE($5, active)
+             WHERE id = $6 RETURNING *`,
+            [b.name ? b.name.trim() : null, b.category ?? null, b.basePrice ?? null,
+             b.description ?? null, b.active ?? null, productId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ errors: ["That product does not exist"] });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not update the product" });
+    }
+});
+
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
 app.listen(port, () => {
