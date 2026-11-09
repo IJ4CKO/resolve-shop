@@ -491,6 +491,44 @@ app.post("/admin/products/:id/variants", requireAuth, requireRole("admin"), asyn
     }
 });
 
+// PATCH /admin/variants/:id: changes a variant's stock and/or image.
+app.patch("/admin/variants/:id", requireAuth, requireRole("admin"), async (req, res) => {
+    const variantId = Number(req.params.id);
+    if (!Number.isInteger(variantId)) {
+        return res.status(400).json({ errors: ["The variant id must be a number"] });
+    }
+
+    const errors = [];
+    if (req.body.stock !== undefined && (!Number.isInteger(req.body.stock) || req.body.stock < 0)) {
+        errors.push("Stock must be a whole number, zero or more");
+    }
+    if (req.body.image !== undefined && (typeof req.body.image !== "string" || req.body.image.trim() === "")) {
+        errors.push("The image path must be text");
+    }
+    if (req.body.stock === undefined && req.body.image === undefined) {
+        errors.push("Send a stock and/or an image to change");
+    }
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE variants
+             SET stock = COALESCE($1, stock), image = COALESCE($2, image)
+             WHERE id = $3 RETURNING *`,
+            [req.body.stock ?? null, req.body.image ? req.body.image.trim() : null, variantId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ errors: ["That variant does not exist"] });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not update the variant" });
+    }
+});
+
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
 app.listen(port, () => {
