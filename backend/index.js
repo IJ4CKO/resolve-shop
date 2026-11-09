@@ -58,6 +58,7 @@ app.use(cors());
 // lets it read information sent to it in a standard format called JSON, needed for orders                                                      
 app.use(express.json());
 
+
 // Checks an incoming order and returns a list of problems. An empty list means it is fine.
 function validateOrder(body) {
     const errors = [];
@@ -86,6 +87,28 @@ function validateOrder(body) {
     }
     if (!body.idempotencyKey || typeof body.idempotencyKey !== "string" || body.idempotencyKey.length < 8) {
         errors.push("An idempotencyKey is required");
+    }
+
+    return errors;
+}
+
+const CATEGORIES = ["T-Shirts", "Hoodies", "Jeans", "Joggers", "Quarter Zips", "Polo Shirts"];
+
+// Checks a new product and returns a list of problems. An empty list means it is fine.
+function validateProduct(body) {
+    const errors = [];
+
+    if (typeof body.name !== "string" || body.name.trim() === "") {
+        errors.push("Name is required");
+    }
+    if (!CATEGORIES.includes(body.category)) {
+        errors.push("Category must be one of: " + CATEGORIES.join(", "));
+    }
+    if (typeof body.basePrice !== "number" || body.basePrice <= 0) {
+        errors.push("Price must be a number above 0");
+    }
+    if (body.description !== undefined && typeof body.description !== "string") {
+        errors.push("Description must be text");
     }
 
     return errors;
@@ -391,7 +414,25 @@ app.post("/auth/login", async (req, res) => {
     }
 });
 
+// POST /admin/products: adds a product. Only a logged-in admin can use it.
+app.post("/admin/products", requireAuth, requireRole("admin"), async (req, res) => {
+    const errors = validateProduct(req.body);
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
 
+    try {
+        const result = await pool.query(
+            `INSERT INTO products (name, category, description, base_price)
+             VALUES ($1, $2, $3, $4) RETURNING *`,
+            [req.body.name.trim(), req.body.category, req.body.description || "", req.body.basePrice]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not add the product" });
+    }
+});
 
 const port = process.env.PORT || 3001; // use Render's door if it gives one, otherwise use 3001.
 
