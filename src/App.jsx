@@ -7,6 +7,7 @@ import Checkout from "./Checkout.jsx";
 import Orders from "./Orders.jsx";
 import { IoBagOutline } from "react-icons/io5";
 import Admin from "./Admin.jsx";
+import OrderSuccess from "./OrderSuccess.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -264,6 +265,7 @@ function App() {
             element={<Admin auth={auth} onLogin={setAuth} onLogout={() => setAuth(null)} />}
           />
 
+          <Route path="/order-success" element={<OrderSuccess onClear={() => setBasket([])} />} />
 
           {/* When the address is /basket, the Basket page is shown. The basket and its functions are passed as props */}
           <Route
