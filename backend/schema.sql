@@ -64,6 +64,7 @@ CREATE TABLE orders (
   status TEXT NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending', 'paid', 'shipped', 'cancelled')),
   total NUMERIC(10,2) NOT NULL,
+  stripe_session_id TEXT UNIQUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

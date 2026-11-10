@@ -5,6 +5,7 @@ import "dotenv/config";
 import pg from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Stripe from "stripe";
 
 // server named app
 const app = express();
@@ -14,11 +15,44 @@ const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL
 });
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 // Makes a readable order reference such as RES-20261108-A4F2
 function makeReference() {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     const random = Math.random().toString(36).slice(2, 6).toUpperCase();
     return "RES-" + date + "-" + random;
+}
+
+// Cancels an order that is still pending and gives its stock back. Safe to call twice:
+// the UPDATE only matches while the status is still 'pending', so the stock is only returned once.
+// The idempotency key is cleared so the customer can try again with a fresh order.
+async function cancelPendingOrder(orderId) {
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const cancelled = await client.query(
+            "UPDATE orders SET status = 'cancelled', idempotency_key = NULL WHERE id = $1 AND status = 'pending'",
+            [orderId]
+        );
+        if (cancelled.rowCount === 0) {
+            await client.query("ROLLBACK");
+            return false;
+        }
+        await client.query(
+            `UPDATE variants v SET stock = v.stock + i.quantity
+             FROM order_items i
+             WHERE i.order_id = $1 AND i.variant_id = v.id`,
+            [orderId]
+        );
+        await client.query("COMMIT");
+        return true;
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 
 // requireAuth: reads the token from the request, checks it is genuine, and remembers who it is.
@@ -263,7 +297,37 @@ app.post("/orders", async (req, res) => {
             }
 
             await client.query("COMMIT");
-            res.status(201).json({ reference, total, lines });
+            // The order is saved. Now ask Stripe for a payment page for the same lines.
+            try {
+                const session = await stripe.checkout.sessions.create({
+                    mode: "payment",
+                    line_items: lines.map((line) => ({
+                        price_data: {
+                            currency: "gbp",
+                            product_data: { name: line.name + " " + line.colour + " (" + line.size + ")" },
+                            // Stripe wants whole pence, not pounds.
+                            unit_amount: Math.round(line.unitPrice * 100)
+                        },
+                        quantity: line.quantity
+                    })),
+                    customer_email: req.body.email.trim(),
+                    client_reference_id: reference,
+                    metadata: { orderId: String(orderId), reference: reference },
+                    // The payment page closes after 30 minutes, which is the shortest Stripe allows.
+                    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+                    success_url: process.env.FRONTEND_URL + "/order-success?reference=" + reference,
+                    cancel_url: process.env.FRONTEND_URL + "/checkout"
+                });
+
+                await pool.query("UPDATE orders SET stripe_session_id = $1 WHERE id = $2", [session.id, orderId]);
+                return res.status(201).json({ reference, total, lines, url: session.url });
+            } catch (stripeError) {
+                console.log("Stripe error message:", stripeError.message);
+                // Stripe failed, so undo the order and give the stock back.
+                console.log(stripeError);
+                await cancelPendingOrder(orderId);
+                return res.status(502).json({ errors: ["Could not start the payment. Please try again."] });
+            }
         } catch (error) {
             await client.query("ROLLBACK");
             // Two identical requests arrived at once, and the other one won. Return its order.
@@ -571,7 +635,7 @@ app.patch("/admin/products/:id", requireAuth, requireRole("admin"), async (req, 
                  active = COALESCE($5, active)
              WHERE id = $6 RETURNING *`,
             [b.name ? b.name.trim() : null, b.category ?? null, b.basePrice ?? null,
-             b.description ?? null, b.active ?? null, productId]
+            b.description ?? null, b.active ?? null, productId]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ errors: ["That product does not exist"] });
