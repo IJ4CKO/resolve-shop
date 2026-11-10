@@ -85,11 +85,52 @@ function requireRole(role) {
     };
 }
 
-
 // lets the website talk to it 
 app.use(cors());
 
-// lets it read information sent to it in a standard format called JSON, needed for orders                                                      
+// Stripe calls this when something happens to a payment. It comes BEFORE express.json(),
+// because checking the signature needs the raw, unparsed body.
+app.post("/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+    let event;
+    try {
+        // Throws an error if the signature is wrong, so a fake call is refused.
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            req.headers["stripe-signature"],
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch (error) {
+        console.log("Webhook signature check failed:", error.message);
+        return res.status(400).send("Invalid signature");
+    }
+
+    try {
+        const session = event.data.object;
+
+        if (event.type === "checkout.session.completed" && session.payment_status === "paid") {
+            // The customer paid. Only a pending order can become paid.
+            await pool.query(
+                "UPDATE orders SET status = 'paid' WHERE stripe_session_id = $1 AND status = 'pending'",
+                [session.id]
+            );
+        }
+
+        if (event.type === "checkout.session.expired") {
+            // The customer never paid. Cancel the order and give the stock back.
+            const order = await pool.query("SELECT id FROM orders WHERE stripe_session_id = $1", [session.id]);
+            if (order.rows.length > 0) {
+                await cancelPendingOrder(order.rows[0].id);
+            }
+        }
+
+        res.json({ received: true });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Webhook handler failed");
+    }
+});
+
+// lets it read information sent to it in a standard format called JSON, needed for orders
 app.use(express.json());
 
 
