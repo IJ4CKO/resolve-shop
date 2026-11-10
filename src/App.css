@@ -464,3 +464,10 @@ text-decoration: line-through strikes through the size, which is how most shops 
   cursor: not-allowed;
   text-decoration: line-through;
 }
+
+.admin-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
