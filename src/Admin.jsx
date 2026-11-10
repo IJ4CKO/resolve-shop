@@ -51,6 +51,26 @@ function Admin(props) {
             });
     }
 
+    // Hide or show a whole product, then reload the list.
+    function setActive(productId, active) {
+        fetch(API_URL + "/admin/products/" + productId, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + props.auth.token
+            },
+            body: JSON.stringify({ active: active })
+        })
+            .then(async (response) => {
+                if (response.ok) {
+                    setMessage(active ? "Product shown" : "Product hidden");
+                    loadProducts();
+                } else {
+                    setMessage("Could not update the product");
+                }
+            });
+    }
+
     // Not logged in, or not an admin: show the login form.
     if (!props.auth || props.auth.role !== "admin") {
         return (
@@ -73,6 +93,9 @@ function Admin(props) {
                     <h3>
                         {product.name} (£{product.price}) {product.active ? "" : "- hidden"}
                     </h3>
+                    <button onClick={() => setActive(product.id, !product.active)}>
+                        {product.active ? "Hide from shop" : "Show in shop"}
+                    </button>
                     <table className="admin-table">
                         <thead>
                             <tr><th>Colour</th><th>Size</th><th>Stock</th></tr>
