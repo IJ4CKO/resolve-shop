@@ -6,7 +6,7 @@ function Admin(props) {
     const [products, setProducts] = useState([]);
     const [message, setMessage] = useState("");
 
-        // Ask the backend for every product. Called when logged in, and again after any change.
+    // Ask the backend for every product. Called when logged in, and again after any change.
     function loadProducts() {
         fetch(API_URL + "/admin/products", {
             headers: { Authorization: "Bearer " + props.auth.token }
@@ -30,6 +30,27 @@ function Admin(props) {
         }
     }, [props.auth]);
 
+    // Change one variant's stock, then reload the list so the page shows the new number.
+    function changeStock(variantId, newStock) {
+        fetch(API_URL + "/admin/variants/" + variantId, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + props.auth.token
+            },
+            body: JSON.stringify({ stock: newStock })
+        })
+            .then(async (response) => {
+                if (response.ok) {
+                    setMessage("Stock updated");
+                    loadProducts();
+                } else {
+                    const data = await response.json();
+                    setMessage((data.errors && data.errors[0]) || "Could not update the stock");
+                }
+            });
+    }
+
     // Not logged in, or not an admin: show the login form.
     if (!props.auth || props.auth.role !== "admin") {
         return (
@@ -40,7 +61,7 @@ function Admin(props) {
         );
     }
 
-        return (
+    return (
         <section className="admin-page">
             <h2>Admin</h2>
             <p>Logged in as {props.auth.email}</p>
@@ -52,7 +73,27 @@ function Admin(props) {
                     <h3>
                         {product.name} (£{product.price}) {product.active ? "" : "- hidden"}
                     </h3>
-                    <p>{product.variants.length} variants</p>
+                    <table className="admin-table">
+                        <thead>
+                            <tr><th>Colour</th><th>Size</th><th>Stock</th></tr>
+                        </thead>
+                        <tbody>
+                            {product.variants.map((variant) => (
+                                <tr key={variant.id}>
+                                    <td>{variant.colour}</td>
+                                    <td>{variant.size}</td>
+                                    <td>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            defaultValue={variant.stock}
+                                            onBlur={(e) => changeStock(variant.id, Number(e.target.value))}
+                                        />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             ))}
         </section>
