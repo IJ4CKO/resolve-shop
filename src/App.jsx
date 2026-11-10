@@ -6,6 +6,7 @@ import Basket from "./Basket.jsx";
 import Checkout from "./Checkout.jsx";
 import Orders from "./Orders.jsx";
 import { IoBagOutline } from "react-icons/io5";
+import Admin from "./Admin.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -58,6 +59,9 @@ function App() {
       return [];
     }
   });
+
+  // Who is logged in: null means nobody. Otherwise { token, role, email }.
+  const [auth, setAuth] = useState(null);
 
   // The catalogue loaded from the backend. It starts empty and fills in when the answer arrives.
   const [catalogue, setCatalogue] = useState([]);
@@ -153,27 +157,27 @@ function App() {
 
 
   // Which colour of each product to feature on the home page.
-const featuredPicks = [
-  { name: "T-Shirt", colour: "Royal Blue" },
-  { name: "Hoodie", colour: "Burgundy" },
-  { name: "Jeans", colour: "Blue" },
-  { name: "Joggers", colour: "Navy Blue" },
-  { name: "Quarter Zip", colour: "Cream" },
-  { name: "Polo Shirt", colour: "White" }
-];
+  const featuredPicks = [
+    { name: "T-Shirt", colour: "Royal Blue" },
+    { name: "Hoodie", colour: "Burgundy" },
+    { name: "Jeans", colour: "Blue" },
+    { name: "Joggers", colour: "Navy Blue" },
+    { name: "Quarter Zip", colour: "Cream" },
+    { name: "Polo Shirt", colour: "White" }
+  ];
 
-// Find each product and the chosen colour inside it. filter(Boolean) drops any pair that wasn't found,
-// for example if a product is hidden or renamed.
-const featuredItems = featuredPicks
-  .map((pick) => {
-    const product = catalogue.find((p) => p.name === pick.name);
-    const colour = product && product.colours.find((c) => c.colour === pick.colour);
-    return product && colour ? { product, colour } : null;
-  })
-  .filter(Boolean);
+  // Find each product and the chosen colour inside it. filter(Boolean) drops any pair that wasn't found,
+  // for example if a product is hidden or renamed.
+  const featuredItems = featuredPicks
+    .map((pick) => {
+      const product = catalogue.find((p) => p.name === pick.name);
+      const colour = product && product.colours.find((c) => c.colour === pick.colour);
+      return product && colour ? { product, colour } : null;
+    })
+    .filter(Boolean);
 
   // The home page shows the featured row. Choosing a category shows all of that category's colours.
-const gridItems = category === "All" ? featuredItems : shownItems;
+  const gridItems = category === "All" ? featuredItems : shownItems;
   return (
     <div>
       <nav className="navbar">
@@ -254,6 +258,11 @@ const gridItems = category === "All" ? featuredItems : shownItems;
               />} />
 
           <Route path="/orders" element={<Orders />} />
+
+          <Route
+            path="/admin"
+            element={<Admin auth={auth} onLogin={setAuth} onLogout={() => setAuth(null)} />}
+          />
 
 
           {/* When the address is /basket, the Basket page is shown. The basket and its functions are passed as props */}
