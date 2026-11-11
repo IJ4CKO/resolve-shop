@@ -450,3 +450,24 @@ scroll-behavior: smooth; }
   border-bottom: 1px solid #e5e5e2;
   vertical-align: top;
 }
+
+ .checkout-errors { 
+  color: #b00020; padding-left: 20px; 
+}
+
+/*:disabled applies only to buttons that are disabled.
+opacity: 0.4 fades the button.
+cursor: not-allowed shows the “no” cursor when you hover over it.
+text-decoration: line-through strikes through the size, which is how most shops show “sold out”.*/
+.size-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.admin-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
