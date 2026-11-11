@@ -478,3 +478,10 @@ text-decoration: line-through strikes through the size, which is how most shops 
   gap: 8px;
   margin-bottom: 24px;
 }
+
+.my-order {
+  border: 1px solid #e5e5e2;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}

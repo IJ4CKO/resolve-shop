@@ -8,6 +8,8 @@ import Orders from "./Orders.jsx";
 import { IoBagOutline } from "react-icons/io5";
 import Admin from "./Admin.jsx";
 import OrderSuccess from "./OrderSuccess.jsx";
+import Account from "./Account.jsx";
+import MyOrders from "./MyOrders.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -312,9 +314,17 @@ function App() {
               < Checkout
                 basket={basket}
                 totalPrice={totalPrice}
+                auth={auth}
               />} />
 
           <Route path="/orders" element={<Orders />} />
+
+          <Route
+            path="/account"
+            element={<Account auth={auth} onLogin={setAuth} onLogout={() => setAuth(null)} />}
+          />
+
+          <Route path="/my-orders" element={<MyOrders auth={auth} />} />
 
           <Route
             path="/admin"

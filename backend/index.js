@@ -235,7 +235,7 @@ app.get("/hello", (req, res) => {
 // POST /orders: validates the order, then looks up every variant in the database and works out the total on the server
 // It also saves the order, its lines and the stock change in one transaction.
 app.post("/orders", optionalAuth, async (req, res) => {
-    const errors = validateOrder(req.body);
+    const errors = validateOrder(req.body || {});
     if (errors.length > 0) {
         return res.status(400).json({ errors });
     }
