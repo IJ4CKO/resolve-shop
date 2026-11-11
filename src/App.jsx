@@ -67,6 +67,18 @@ function App() {
   // The catalogue loaded from the backend. It starts empty and fills in when the answer arrives.
   const [catalogue, setCatalogue] = useState([]);
 
+  // The shop's search, sort and price choices. Empty means "not chosen".
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [colour, setColour] = useState("");
+  const [inStock, setInStock] = useState(false);
+  const [colours, setColours] = useState([]);   // every colour, for the menu
+
+  // All means no category chosen yet
+  const [category, setCategory] = useState("All");
+
   //message shows the words to show and setMessage changes the message. useState("") starts as an empty string.
   const [message, setMessage] = useState("");
 
@@ -84,12 +96,34 @@ function App() {
     return () => clearTimeout(timer);
   }, [message]);
 
-  // Runs once when the page first loads: ask the backend for the products.
+  // Ask the backend for the catalogue, with the choices made so far. Runs on load and whenever a choice changes.
   useEffect(() => {
-    fetch(API_URL + "/products")
+    const params = new URLSearchParams();
+    if (search.trim() !== "") params.set("search", search.trim());
+    if (sort !== "") params.set("sort", sort);
+    if (minPrice !== "") params.set("minPrice", minPrice);
+    if (maxPrice !== "") params.set("maxPrice", maxPrice);
+    if (colour !== "") params.set("colour", colour);
+    if (inStock) params.set("inStock", "true");
+    if (category !== "All") params.set("category", category);
+
+    // If the choices change again before this answer arrives, the old answer is ignored.
+    let ignore = false;
+    fetch(API_URL + "/products?" + params.toString())
       .then((response) => response.json())
-      .then((data) => setCatalogue(data));
-  }, [])
+      .then((data) => {
+        if (!ignore) setCatalogue(data);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [search, sort, minPrice, maxPrice, colour, inStock, category]);
+  // Load the list of colours once, for the colour menu.
+  useEffect(() => {
+    fetch(API_URL + "/colours")
+      .then((response) => response.json())
+      .then((data) => setColours(data));
+  }, []);
 
   // Whenever the basket changes, save a copy in the browser.
   useEffect(() => {
@@ -147,9 +181,6 @@ function App() {
     }
   }
 
-  // All means no filter has been applied yet
-  const [category, setCategory] = useState("All");
-
   // One entry for every colour of every product: 30 in total.
   const items = catalogue.flatMap((p) => p.colours.map((c) => ({ product: p, colour: c })));
 
@@ -177,8 +208,9 @@ function App() {
     })
     .filter(Boolean);
 
-  // The home page shows the featured row. Choosing a category shows all of that category's colours.
-  const gridItems = category === "All" ? featuredItems : shownItems;
+  // True when the customer has searched, sorted or set a price. Then we show every match, not just the featured row.
+  const filtering = search.trim() !== "" || sort !== "" || minPrice !== "" || maxPrice !== "" || colour !== "" || inStock;
+  const gridItems = category === "All" && !filtering ? featuredItems : shownItems;
   return (
     <div>
       <nav className="navbar">
@@ -227,7 +259,31 @@ function App() {
                   <a href="#products" className="category-tile" onClick={() => setCategory("Polo Shirts")}>POLO SHIRTS</a>
                 </div>
 
-                <h2 className="section-title" id="products">{category === "All" ? "Featured Products" : category.toUpperCase()}</h2>
+                <h2 className="section-title" id="products">{category === "All" ? (filtering ? "Results" : "Featured Products") : category.toUpperCase()}</h2>
+                <div className="shop-controls">
+                  <input placeholder="Search products" value={search} onChange={(e) => setSearch(e.target.value)} />
+                  <select value={colour} onChange={(e) => setColour(e.target.value)}>
+                    <option value="">All colours</option>
+                    {colours.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                    <option value="">Sort: featured</option>
+                    <option value="price_asc">Price: low to high</option>
+                    <option value="price_desc">Price: high to low</option>
+                    <option value="name_asc">Name: A to Z</option>
+                  </select>
+                  <input type="number" min="0" placeholder="Min price (£)" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+                  <input type="number" min="0" placeholder="Max price (£)" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
+                  <label>
+                    <input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)} /> In stock only
+                  </label>
+                  <button onClick={() => { setSearch(""); setSort(""); setMinPrice(""); setMaxPrice(""); setColour(""); setInStock(false); setCategory("All"); }}>
+                    Clear
+                  </button>
+                </div>
+                {gridItems.length === 0 && filtering && <p>No products match your search.</p>}
                 <ul className="product-grid">
                   {/* .map() repeats what is inside it for each product. 
                   key gives each item a unique label so React can tell them apart*/}

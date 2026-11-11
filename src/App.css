@@ -471,3 +471,10 @@ text-decoration: line-through strikes through the size, which is how most shops 
   gap: 8px;
   margin-bottom: 24px;
 }
+
+.shop-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}

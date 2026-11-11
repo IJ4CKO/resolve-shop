@@ -444,6 +444,23 @@ const SORT_OPTIONS = {
     name_asc: "p.name ASC"
 };
 
+// GET /colours: every colour that an active product comes in, for the shop's colour menu.
+app.get("/colours", async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT DISTINCT v.colour
+            FROM variants v
+            JOIN products p ON p.id = v.product_id
+            WHERE p.active = TRUE
+            ORDER BY v.colour
+        `);
+        res.json(result.rows.map((row) => row.colour));
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not load the colours" });
+    }
+});
+
 // GET /products: sends back every active product, with its colours and sizes.
 // Optional choices in the address: search, category, minPrice, maxPrice, sort.
 app.get("/products", async (req, res) => {
@@ -474,6 +491,17 @@ app.get("/products", async (req, res) => {
         if (req.query.maxPrice && !Number.isNaN(maxPrice)) {
             values.push(maxPrice);
             conditions.push("p.base_price <= $" + values.length);
+        }
+
+        // Colour: only products that come in this colour, showing just that colour.
+        if (typeof req.query.colour === "string" && req.query.colour.trim() !== "") {
+            values.push(req.query.colour.trim());
+            conditions.push("v.colour = $" + values.length);
+        }
+
+        // In stock only: keep a colour if at least one of its sizes is in stock. Its sold-out sizes still show, greyed out.
+        if (req.query.inStock === "true") {
+            conditions.push("EXISTS (SELECT 1 FROM variants s WHERE s.product_id = p.id AND s.colour = v.colour AND s.stock > 0)");
         }
 
         // Sorting: only the names in SORT_OPTIONS are accepted.
