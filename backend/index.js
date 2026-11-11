@@ -603,6 +603,45 @@ app.post("/auth/login", async (req, res) => {
     }
 });
 
+// POST /auth/register: creates a customer account and logs the new customer in.
+app.post("/auth/register", async (req, res) => {
+    const { email, password } = req.body;
+
+    const errors = [];
+    if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        errors.push("A valid email is required");
+    }
+    if (typeof password !== "string" || password.length < 10) {
+        errors.push("The password must be at least 10 characters");
+    }
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+
+    try {
+        // Scramble the password. Only the scrambled version is ever saved.
+        const hash = await bcrypt.hash(password, 12);
+
+        // The role is set HERE, never taken from the request, so nobody can register themselves as an admin.
+        const result = await pool.query(
+            "INSERT INTO users (email, password_hash, role) VALUES ($1, $2, 'customer') RETURNING id, email, role",
+            [email.trim().toLowerCase(), hash]
+        );
+        const user = result.rows[0];
+
+        // Log them in straight away, with the same kind of token as the login route.
+        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "8h" });
+        res.status(201).json({ token, role: user.role, email: user.email });
+    } catch (error) {
+        // 23505 means an account with this email already exists (the email column is UNIQUE).
+        if (error.code === "23505") {
+            return res.status(409).json({ errors: ["An account with that email already exists"] });
+        }
+        console.log(error);
+        res.status(500).json({ message: "Could not create the account" });
+    }
+});
+
 // POST /admin/products: adds a product. Only a logged-in admin can use it.
 app.post("/admin/products", requireAuth, requireRole("admin"), async (req, res) => {
     const errors = validateProduct(req.body);
