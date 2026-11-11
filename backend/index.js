@@ -85,6 +85,22 @@ function requireRole(role) {
     };
 }
 
+// optionalAuth: if a valid token comes with the request, remember who it is. If there is no token,
+// or it is invalid or expired, carry on as a guest. Unlike requireAuth, it never refuses anyone.
+function optionalAuth(req, res, next) {
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+
+    if (token) {
+        try {
+            req.user = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (error) {
+            // A bad token is treated as a guest, so a customer with an old token can still check out.
+        }
+    }
+    next();
+}
+
 // lets the website talk to it 
 app.use(cors());
 
@@ -218,7 +234,7 @@ app.get("/hello", (req, res) => {
 
 // POST /orders: validates the order, then looks up every variant in the database and works out the total on the server
 // It also saves the order, its lines and the stock change in one transaction.
-app.post("/orders", async (req, res) => {
+app.post("/orders", optionalAuth, async (req, res) => {
     const errors = validateOrder(req.body);
     if (errors.length > 0) {
         return res.status(400).json({ errors });
@@ -227,6 +243,8 @@ app.post("/orders", async (req, res) => {
     try {
         const items = req.body.items;
         const idempotencyKey = req.body.idempotencyKey;
+        // Who is buying: the id from the VERIFIED TOKEN, or nothing for a guest. Never taken from the request body.
+        const userId = req.user ? req.user.id : null;
 
         // If we have already saved an order with this key, return it and stop. Nothing is charged twice.
         const existing = await pool.query(
@@ -311,9 +329,9 @@ app.post("/orders", async (req, res) => {
 
             const reference = makeReference();
             const orderResult = await client.query(
-                `INSERT INTO orders (reference, name, email, address, total, idempotency_key)
-                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total, idempotencyKey]
+                `INSERT INTO orders (reference, name, email, address, total, idempotency_key, user_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total, idempotencyKey, userId]
             );
             const orderId = orderResult.rows[0].id;
 
