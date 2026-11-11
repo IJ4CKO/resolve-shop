@@ -437,6 +437,32 @@ app.get("/orders", requireAuth, requireRole("admin"), async (req, res) => {
     }
 });
 
+// GET /my/orders: the logged-in customer's own orders, newest first, each with its lines.
+app.get("/my/orders", requireAuth, async (req, res) => {
+    try {
+        // Only orders belonging to the person in the token. Nothing the customer types can change this.
+        const ordersResult = await pool.query(
+            "SELECT id, reference, status, total, created_at FROM orders WHERE user_id = $1 ORDER BY created_at DESC",
+            [req.user.id]
+        );
+        const orders = ordersResult.rows;
+
+        const orderIds = orders.map((order) => order.id);
+        const itemsResult = await pool.query(
+            "SELECT order_id, name, colour, size, unit_price, quantity FROM order_items WHERE order_id = ANY($1) ORDER BY id",
+            [orderIds]
+        );
+
+        res.json(orders.map((order) => ({
+            ...order,
+            items: itemsResult.rows.filter((item) => item.order_id === order.id)
+        })));
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not load your orders" });
+    }
+});
+
 // when visiting /db-test run this code. async means the function has to wait for the database,
 //  so it can pause while it waits. req is the request that arrived and res is the response sent back
 app.get("/db-test", async (req, res) => {
