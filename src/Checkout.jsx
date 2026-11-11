@@ -1,15 +1,23 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
+
 const API_URL = import.meta.env.VITE_API_URL;
+
+// Stripe.js is loaded once, outside the component, with the publishable key from the settings.
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function Checkout(props) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
-    const [busy, setBusy] = useState(false);          // true while the order is being sent
-    const [errors, setErrors] = useState([]);          // messages from the backend, if it refuses
-    const keyRef = useRef(crypto.randomUUID());        // one key for this checkout
+    const [busy, setBusy] = useState(false);            // true while the order is being sent
+    const [errors, setErrors] = useState([]);           // messages from the backend, if it refuses
+    const [clientSecret, setClientSecret] = useState(""); // set once the order exists; empty means "show the form"
+    const keyRef = useRef(crypto.randomUUID());         // one key for this checkout
 
+    // Saves the order, then asks Stripe for the card form.
     function placeOrder() {
         // If an order is already being sent, a second click does nothing.
         if (busy) return;
@@ -30,11 +38,11 @@ function Checkout(props) {
         })
             .then(async (response) => {
                 const data = await response.json();
-                if (response.ok && data.url) {
-                    // The order is saved. Send the customer to Stripe's payment page.
-                    window.location.href = data.url;
+                if (response.ok && data.clientSecret) {
+                    // The order is saved. Showing the form is just a matter of keeping the secret.
+                    setClientSecret(data.clientSecret);
                 } else if (response.ok) {
-                    // A repeated request: the order already exists and has no new payment page.
+                    // A repeated request: the order already exists and has no new payment form.
                     setErrors(["This order was already submitted."]);
                 } else {
                     setErrors(data.errors || [data.message || "Something went wrong"]);
@@ -42,6 +50,21 @@ function Checkout(props) {
             })
             .catch(() => setErrors(["Could not reach the shop. Please try again."]))
             .finally(() => setBusy(false));
+    }
+
+    // Step two: the order exists, so show Stripe's card form inside this page.
+    if (clientSecret) {
+        return (
+            <section className="checkout">
+                <h2>Payment</h2>
+                <p className="demo-notice">Demo shop: use the test card 4242 4242 4242 4242, any future date and any 3 digits.</p>
+                <div className="embedded-checkout">
+                    <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                        <EmbeddedCheckout />
+                    </EmbeddedCheckoutProvider>
+                </div>
+            </section>
+        );
     }
 
     if (props.basket.length === 0) {
@@ -54,6 +77,7 @@ function Checkout(props) {
         );
     }
 
+    // Step one: the customer's details.
     return (
         <section className="checkout">
             <h2>Checkout</h2>
@@ -79,7 +103,7 @@ function Checkout(props) {
             )}
 
             <button className="place-order" disabled={busy} onClick={() => placeOrder()}>
-                {busy ? "Placing order..." : "Place order"}
+                {busy ? "Preparing payment..." : "Continue to payment"}
             </button>
         </section>
     );
