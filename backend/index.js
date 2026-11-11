@@ -356,12 +356,12 @@ app.post("/orders", async (req, res) => {
                     metadata: { orderId: String(orderId), reference: reference },
                     // The payment page closes after 30 minutes, which is the shortest Stripe allows.
                     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-                    success_url: process.env.FRONTEND_URL + "/order-success?reference=" + reference,
-                    cancel_url: process.env.FRONTEND_URL + "/checkout"
+                    ui_mode: "embedded_page",
+                    return_url: process.env.FRONTEND_URL + "/order-success?reference=" + reference + "&session_id={CHECKOUT_SESSION_ID}"
                 });
 
                 await pool.query("UPDATE orders SET stripe_session_id = $1 WHERE id = $2", [session.id, orderId]);
-                return res.status(201).json({ reference, total, lines, url: session.url });
+                return res.status(201).json({ reference, total, lines, clientSecret: session.client_secret });
             } catch (stripeError) {
                 console.log("Stripe error message:", stripeError.message);
                 // Stripe failed, so undo the order and give the stock back.
