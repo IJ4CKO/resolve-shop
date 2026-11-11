@@ -437,24 +437,58 @@ app.get("/db-test", async (req, res) => {
     }
 });
 
-// GET /products: when someone asks for /products, this sends back every product that is on
-// sale, each with its colours, and each colour with its sizes and stock.
+// The sort choices a customer can pick. This text goes into the query, so only these exact options are allowed.
+const SORT_OPTIONS = {
+    price_asc: "p.base_price ASC",
+    price_desc: "p.base_price DESC",
+    name_asc: "p.name ASC"
+};
+
+// GET /products: sends back every active product, with its colours and sizes.
+// Optional choices in the address: search, category, minPrice, maxPrice, sort.
 app.get("/products", async (req, res) => {
-    // try means "attempt this". If anything goes wrong, the code jumps down to catch.
     try {
-        // Ask the database for one flat row for every variant, joined to its product.
-        // JOIN matches each variant's product_id to a product's id.
-        // WHERE p.active = TRUE leaves out products that have been hidden.
-        // ORDER BY keeps the rows in a steady order each time.
+        // Each choice adds a condition here, and its value goes in "values" (the $1, $2... slots).
+        const conditions = ["p.active = TRUE"];
+        const values = [];
+
+        // Search: the name or category contains the text, ignoring capitals.
+        if (typeof req.query.search === "string" && req.query.search.trim() !== "") {
+            values.push("%" + req.query.search.trim() + "%");
+            conditions.push("(p.name ILIKE $" + values.length + " OR p.category ILIKE $" + values.length + ")");
+        }
+
+        // Category: only the real categories are accepted.
+        if (CATEGORIES.includes(req.query.category)) {
+            values.push(req.query.category);
+            conditions.push("p.category = $" + values.length);
+        }
+
+        // Price range: only real numbers are accepted. Anything else is ignored.
+        const minPrice = Number(req.query.minPrice);
+        if (req.query.minPrice && !Number.isNaN(minPrice)) {
+            values.push(minPrice);
+            conditions.push("p.base_price >= $" + values.length);
+        }
+        const maxPrice = Number(req.query.maxPrice);
+        if (req.query.maxPrice && !Number.isNaN(maxPrice)) {
+            values.push(maxPrice);
+            conditions.push("p.base_price <= $" + values.length);
+        }
+
+        // Sorting: only the names in SORT_OPTIONS are accepted.
+        const sortText = Object.hasOwn(SORT_OPTIONS, req.query.sort) ? SORT_OPTIONS[req.query.sort] + ", " : "";
+
         const result = await pool.query(`
             SELECT
               p.id AS product_id, p.name, p.category, p.base_price,
               v.id AS variant_id, v.colour, v.size, v.image, v.stock
             FROM products p
             JOIN variants v ON v.product_id = p.id
-            WHERE p.active = TRUE
-            ORDER BY p.id, v.colour, v.id
-        `);
+            WHERE ${conditions.join(" AND ")}
+            ORDER BY ${sortText}p.id, v.colour, v.id
+        `, values);
+
 
         // This will hold the finished answer: a list of products.
         const products = [];
