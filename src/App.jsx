@@ -241,7 +241,7 @@ function App() {
               <div className="clothing-dropdown-menu account-menu">
                 <span className="account-menu-email">{auth.email}</span>
                 {auth.role === "admin" ? <Link to="/admin">Admin</Link> : <Link to="/my-orders">My orders</Link>}
-                <Link to="/account">Account</Link>
+                <Link to="/account and password">Account</Link>
                 <button className="account-menu-button" onClick={() => setAuth(null)}>Log out</button>
               </div>
             )}
