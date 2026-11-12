@@ -4,7 +4,6 @@ import { Routes, Route, Link } from "react-router-dom";
 import About from "./About.jsx";
 import Basket from "./Basket.jsx";
 import Checkout from "./Checkout.jsx";
-import Orders from "./Orders.jsx";
 import Admin from "./Admin.jsx";
 import OrderSuccess from "./OrderSuccess.jsx";
 import Account from "./Account.jsx";
@@ -330,8 +329,6 @@ function App() {
                 totalPrice={totalPrice}
                 auth={auth}
               />} />
-
-          <Route path="/orders" element={<Orders />} />
 
           <Route
             path="/account"
