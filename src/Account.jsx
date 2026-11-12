@@ -1,17 +1,24 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import Login from "./Login.jsx";
 const API_URL = import.meta.env.VITE_API_URL;
 
 // One page for everyone: log in, create an account, or (when logged in) see who you are and change your password.
 function Account(props) {
-    const [creating, setCreating] = useState(false);
+    // The address can say which form to show: /account?mode=register opens the create-account form.
+    const [params] = useSearchParams();
+    const [creating, setCreating] = useState(params.get("mode") === "register");
 
-    // For the change-password form. These sit up here, above any early return, because React needs
-    // every useState to run in the same order each time.
+    // For the change-password form.
     const [oldPw, setOldPw] = useState("");
     const [newPw, setNewPw] = useState("");
     const [pwMessage, setPwMessage] = useState("");
+
+    // If the visitor is already on this page and picks the other menu entry, the address changes but the page
+    // doesn't reload, so follow the address again.
+    useEffect(() => {
+        setCreating(params.get("mode") === "register");
+    }, [params]);
 
     // Send the current and the new password, with the login token.
     function changePassword() {

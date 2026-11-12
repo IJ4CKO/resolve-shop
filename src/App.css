@@ -526,3 +526,41 @@ text-decoration: line-through strikes through the size, which is how most shops 
   font: inherit;
   cursor: pointer;
 }
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--secondary-colour);
+}
+
+.auth-form input {
+  padding: 12px;
+  border: 1px solid var(--secondary-colour);
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.auth-error {
+  color: #b00020;
+  min-height: 1.2em;
+  margin: 0;
+}
+
+/* The account menu uses sentence case, not the capitals of the Shop menu. */
+.account-menu a,
+.account-menu button,
+.account-menu-email {
+  text-transform: none;
+  letter-spacing: normal;
+}

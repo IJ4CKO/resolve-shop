@@ -63,7 +63,19 @@ function App() {
   });
 
   // Who is logged in: null means nobody. Otherwise { token, role, email }.
-  const [auth, setAuth] = useState(null);
+  // On load, look for a saved login. A token expires after 8 hours, so an old one is thrown away.
+  const [auth, setAuth] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("auth");
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      // A token is three parts joined by dots. The middle part holds its contents, including "exp" (the expiry time, in seconds).
+      const payload = JSON.parse(atob(parsed.token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+      return payload.exp * 1000 > Date.now() ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
 
   // The catalogue loaded from the backend. It starts empty and fills in when the answer arrives.
   const [catalogue, setCatalogue] = useState([]);
@@ -130,6 +142,19 @@ function App() {
   useEffect(() => {
     localStorage.setItem("basket", JSON.stringify(basket));   // JSON.stringify turns the basket into text.
   }, [basket]);
+
+  // Whenever the login changes, save it (or clear it, after a log out).
+  useEffect(() => {
+    try {
+      if (auth) {
+        sessionStorage.setItem("auth", JSON.stringify(auth));
+      } else {
+        sessionStorage.removeItem("auth");
+      }
+    } catch {
+      // Storage can be blocked in some browsers. The login then lives only in memory, as before.
+    }
+  }, [auth]);
 
   // the 0 at the end of .reduce() is the starting value of the running total.
   const totalItems = basket.reduce((sum, item) => sum + item.quantity, 0);
@@ -232,18 +257,25 @@ function App() {
           </div>
           <Link to="/about">About</Link>
           <div className="clothing-dropdown account-dropdown">
-            <Link to="/account" title={auth ? "Your account (" + auth.email + ")" : "Log in"} className="account-link">
+            <Link to="/account" className="account-link" aria-label="Account">
               <IoPersonOutline size={24} />
               {auth && <span className="account-dot" />}
             </Link>
-            {auth && (
-              <div className="clothing-dropdown-menu account-menu">
-                <span className="account-menu-email">{auth.email}</span>
-                {auth.role === "admin" ? <Link to="/admin">Admin</Link> : <Link to="/my-orders">My orders</Link>}
-                <Link to="/account and password">Account</Link>
-                <button className="account-menu-button" onClick={() => setAuth(null)}>Log out</button>
-              </div>
-            )}
+            <div className="clothing-dropdown-menu account-menu">
+              {auth ? (
+                <>
+                  <span className="account-menu-email">{auth.email}</span>
+                  {auth.role === "admin" ? <Link to="/admin">Admin</Link> : <Link to="/my-orders">My orders</Link>}
+                  <Link to="/account">Account and password</Link>
+                  <button className="account-menu-button" onClick={() => setAuth(null)}>Log out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/account">Log in</Link>
+                  <Link to="/account?mode=register">Create an account</Link>
+                </>
+              )}
+            </div>
           </div>
           <Link to="/basket"><IoBagOutline size={24} /></Link>
         </div>
@@ -356,6 +388,8 @@ function App() {
               />
             }
           />
+          <Route path="*" element={<section className="account-page"><h2>Page not found</h2><Link to="/">Back to the shop</Link></section>} />
+
         </Routes>
         {message && <div className="toast">{message}</div>}
       </div>

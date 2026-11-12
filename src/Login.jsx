@@ -7,11 +7,14 @@ function Login(props) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [busy, setBusy] = useState(false);
 
-    // The two forms are identical apart from which backend address they use.
     const path = props.register ? "/auth/register" : "/auth/login";
 
-    function submit() {
+    function submit(event) {
+        event.preventDefault();          // stops the browser reloading the page when the form is sent
+        if (busy) return;
+        setBusy(true);
         setMessage("");
         fetch(API_URL + path, {
             method: "POST",
@@ -21,23 +24,37 @@ function Login(props) {
             .then(async (response) => {
                 const data = await response.json();
                 if (!response.ok) {
-                    // Login sends a "message", and register sends a list called "errors".
                     setMessage(data.message || (data.errors && data.errors.join(", ")) || "Something went wrong");
                     return;
                 }
                 setPassword("");
                 props.onLogin(data);
             })
-            .catch(() => setMessage("Could not reach the shop"));
+            .catch(() => setMessage("Could not reach the shop"))
+            .finally(() => setBusy(false));
     }
 
     return (
-        <div>
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button onClick={() => submit()}>{props.register ? "Create account" : "Log in"}</button>
-            <p>{message}</p>
-        </div>
+        <form className="auth-form" onSubmit={submit}>
+            <label>
+                Email
+                <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </label>
+            <label>
+                Password
+                <input
+                    type="password"
+                    autoComplete={props.register ? "new-password" : "current-password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+            </label>
+            <button type="submit" disabled={busy}>
+                {busy ? "Please wait..." : props.register ? "Create account" : "Log in"}
+            </button>
+            <p className="auth-error">{message}</p>
+        </form>
     );
 }
 
