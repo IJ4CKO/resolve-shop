@@ -686,6 +686,45 @@ app.post("/auth/register", async (req, res) => {
     }
 });
 
+// POST /auth/change-password: a logged-in user changes their own password. The current password must be right.
+app.post("/auth/change-password", requireAuth, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+        return res.status(400).json({ errors: ["Both passwords are required"] });
+    }
+    if (newPassword.length < 10) {
+        return res.status(400).json({ errors: ["The new password must be at least 10 characters"] });
+    }
+    if (newPassword === currentPassword) {
+        return res.status(400).json({ errors: ["The new password must be different from the current one"] });
+    }
+
+    try {
+        // Find the stored hash for the person in the token.
+        const result = await pool.query("SELECT password_hash FROM users WHERE id = $1", [req.user.id]);
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(401).json({ message: "Please log in again" });
+        }
+
+        // Check the current password against the stored hash.
+        const matches = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!matches) {
+            return res.status(400).json({ errors: ["The current password is incorrect"] });
+        }
+
+        // Save the hash of the new one.
+        const newHash = await bcrypt.hash(newPassword, 12);
+        await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [newHash, req.user.id]);
+
+        res.json({ message: "Password changed" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not change the password" });
+    }
+});
+
 // POST /admin/products: adds a product. Only a logged-in admin can use it.
 app.post("/admin/products", requireAuth, requireRole("admin"), async (req, res) => {
     const errors = validateProduct(req.body);

@@ -5,11 +5,11 @@ import About from "./About.jsx";
 import Basket from "./Basket.jsx";
 import Checkout from "./Checkout.jsx";
 import Orders from "./Orders.jsx";
-import { IoBagOutline } from "react-icons/io5";
 import Admin from "./Admin.jsx";
 import OrderSuccess from "./OrderSuccess.jsx";
 import Account from "./Account.jsx";
 import MyOrders from "./MyOrders.jsx";
+import { IoBagOutline, IoPersonOutline } from "react-icons/io5";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -232,6 +232,20 @@ function App() {
             </div>
           </div>
           <Link to="/about">About</Link>
+          <div className="clothing-dropdown account-dropdown">
+            <Link to="/account" title={auth ? "Your account (" + auth.email + ")" : "Log in"} className="account-link">
+              <IoPersonOutline size={24} />
+              {auth && <span className="account-dot" />}
+            </Link>
+            {auth && (
+              <div className="clothing-dropdown-menu account-menu">
+                <span className="account-menu-email">{auth.email}</span>
+                {auth.role === "admin" ? <Link to="/admin">Admin</Link> : <Link to="/my-orders">My orders</Link>}
+                <Link to="/account">Account</Link>
+                <button className="account-menu-button" onClick={() => setAuth(null)}>Log out</button>
+              </div>
+            )}
+          </div>
           <Link to="/basket"><IoBagOutline size={24} /></Link>
         </div>
       </nav>
