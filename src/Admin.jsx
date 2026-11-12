@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Login from "./Login.jsx";
 const API_URL = import.meta.env.VITE_API_URL;
+import AdminOrders from "./AdminOrders.jsx";
 
 // The categories the backend accepts. They must match the list in the backend exactly.
 const CATEGORIES = ["T-Shirts", "Hoodies", "Jeans", "Joggers", "Quarter Zips", "Polo Shirts"];
@@ -242,6 +243,7 @@ function Admin(props) {
                     </table>
                 </div>
             ))}
+            <AdminOrders auth={props.auth} />
         </section>
     );
 }

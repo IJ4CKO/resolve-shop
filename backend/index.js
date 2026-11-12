@@ -85,6 +85,22 @@ function requireRole(role) {
     };
 }
 
+// optionalAuth: if a valid token comes with the request, remember who it is. If there is no token,
+// or it is invalid or expired, carry on as a guest. Unlike requireAuth, it never refuses anyone.
+function optionalAuth(req, res, next) {
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+
+    if (token) {
+        try {
+            req.user = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (error) {
+            // A bad token is treated as a guest, so a customer with an old token can still check out.
+        }
+    }
+    next();
+}
+
 // lets the website talk to it 
 app.use(cors());
 
@@ -218,8 +234,8 @@ app.get("/hello", (req, res) => {
 
 // POST /orders: validates the order, then looks up every variant in the database and works out the total on the server
 // It also saves the order, its lines and the stock change in one transaction.
-app.post("/orders", async (req, res) => {
-    const errors = validateOrder(req.body);
+app.post("/orders", optionalAuth, async (req, res) => {
+    const errors = validateOrder(req.body || {});
     if (errors.length > 0) {
         return res.status(400).json({ errors });
     }
@@ -227,6 +243,8 @@ app.post("/orders", async (req, res) => {
     try {
         const items = req.body.items;
         const idempotencyKey = req.body.idempotencyKey;
+        // Who is buying: the id from the VERIFIED TOKEN, or nothing for a guest. Never taken from the request body.
+        const userId = req.user ? req.user.id : null;
 
         // If we have already saved an order with this key, return it and stop. Nothing is charged twice.
         const existing = await pool.query(
@@ -311,9 +329,9 @@ app.post("/orders", async (req, res) => {
 
             const reference = makeReference();
             const orderResult = await client.query(
-                `INSERT INTO orders (reference, name, email, address, total, idempotency_key)
-                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total, idempotencyKey]
+                `INSERT INTO orders (reference, name, email, address, total, idempotency_key, user_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+                [reference, req.body.name.trim(), req.body.email.trim(), req.body.address.trim(), total, idempotencyKey, userId]
             );
             const orderId = orderResult.rows[0].id;
 
@@ -419,6 +437,32 @@ app.get("/orders", requireAuth, requireRole("admin"), async (req, res) => {
     }
 });
 
+// GET /my/orders: the logged-in customer's own orders, newest first, each with its lines.
+app.get("/my/orders", requireAuth, async (req, res) => {
+    try {
+        // Only orders belonging to the person in the token. Nothing the customer types can change this.
+        const ordersResult = await pool.query(
+            "SELECT id, reference, status, total, created_at FROM orders WHERE user_id = $1 ORDER BY created_at DESC",
+            [req.user.id]
+        );
+        const orders = ordersResult.rows;
+
+        const orderIds = orders.map((order) => order.id);
+        const itemsResult = await pool.query(
+            "SELECT order_id, name, colour, size, unit_price, quantity FROM order_items WHERE order_id = ANY($1) ORDER BY id",
+            [orderIds]
+        );
+
+        res.json(orders.map((order) => ({
+            ...order,
+            items: itemsResult.rows.filter((item) => item.order_id === order.id)
+        })));
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not load your orders" });
+    }
+});
+
 // when visiting /db-test run this code. async means the function has to wait for the database,
 //  so it can pause while it waits. req is the request that arrived and res is the response sent back
 app.get("/db-test", async (req, res) => {
@@ -437,24 +481,86 @@ app.get("/db-test", async (req, res) => {
     }
 });
 
-// GET /products: when someone asks for /products, this sends back every product that is on
-// sale, each with its colours, and each colour with its sizes and stock.
-app.get("/products", async (req, res) => {
-    // try means "attempt this". If anything goes wrong, the code jumps down to catch.
+// The sort choices a customer can pick. This text goes into the query, so only these exact options are allowed.
+const SORT_OPTIONS = {
+    price_asc: "p.base_price ASC",
+    price_desc: "p.base_price DESC",
+    name_asc: "p.name ASC"
+};
+
+// GET /colours: every colour that an active product comes in, for the shop's colour menu.
+app.get("/colours", async (req, res) => {
     try {
-        // Ask the database for one flat row for every variant, joined to its product.
-        // JOIN matches each variant's product_id to a product's id.
-        // WHERE p.active = TRUE leaves out products that have been hidden.
-        // ORDER BY keeps the rows in a steady order each time.
+        const result = await pool.query(`
+            SELECT DISTINCT v.colour
+            FROM variants v
+            JOIN products p ON p.id = v.product_id
+            WHERE p.active = TRUE
+            ORDER BY v.colour
+        `);
+        res.json(result.rows.map((row) => row.colour));
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not load the colours" });
+    }
+});
+
+// GET /products: sends back every active product, with its colours and sizes.
+// Optional choices in the address: search, category, minPrice, maxPrice, sort.
+app.get("/products", async (req, res) => {
+    try {
+        // Each choice adds a condition here, and its value goes in "values" (the $1, $2... slots).
+        const conditions = ["p.active = TRUE"];
+        const values = [];
+
+        // Search: the name or category contains the text, ignoring capitals.
+        if (typeof req.query.search === "string" && req.query.search.trim() !== "") {
+            values.push("%" + req.query.search.trim() + "%");
+            conditions.push("(p.name ILIKE $" + values.length + " OR p.category ILIKE $" + values.length + ")");
+        }
+
+        // Category: only the real categories are accepted.
+        if (CATEGORIES.includes(req.query.category)) {
+            values.push(req.query.category);
+            conditions.push("p.category = $" + values.length);
+        }
+
+        // Price range: only real numbers are accepted. Anything else is ignored.
+        const minPrice = Number(req.query.minPrice);
+        if (req.query.minPrice && !Number.isNaN(minPrice)) {
+            values.push(minPrice);
+            conditions.push("p.base_price >= $" + values.length);
+        }
+        const maxPrice = Number(req.query.maxPrice);
+        if (req.query.maxPrice && !Number.isNaN(maxPrice)) {
+            values.push(maxPrice);
+            conditions.push("p.base_price <= $" + values.length);
+        }
+
+        // Colour: only products that come in this colour, showing just that colour.
+        if (typeof req.query.colour === "string" && req.query.colour.trim() !== "") {
+            values.push(req.query.colour.trim());
+            conditions.push("v.colour = $" + values.length);
+        }
+
+        // In stock only: keep a colour if at least one of its sizes is in stock. Its sold-out sizes still show, greyed out.
+        if (req.query.inStock === "true") {
+            conditions.push("EXISTS (SELECT 1 FROM variants s WHERE s.product_id = p.id AND s.colour = v.colour AND s.stock > 0)");
+        }
+
+        // Sorting: only the names in SORT_OPTIONS are accepted.
+        const sortText = Object.hasOwn(SORT_OPTIONS, req.query.sort) ? SORT_OPTIONS[req.query.sort] + ", " : "";
+
         const result = await pool.query(`
             SELECT
               p.id AS product_id, p.name, p.category, p.base_price,
               v.id AS variant_id, v.colour, v.size, v.image, v.stock
             FROM products p
             JOIN variants v ON v.product_id = p.id
-            WHERE p.active = TRUE
-            ORDER BY p.id, v.colour, v.id
-        `);
+            WHERE ${conditions.join(" AND ")}
+            ORDER BY ${sortText}p.id, v.colour, v.id
+        `, values);
+
 
         // This will hold the finished answer: a list of products.
         const products = [];
@@ -538,6 +644,84 @@ app.post("/auth/login", async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Could not log in" });
+    }
+});
+
+// POST /auth/register: creates a customer account and logs the new customer in.
+app.post("/auth/register", async (req, res) => {
+    const { email, password } = req.body;
+
+    const errors = [];
+    if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        errors.push("A valid email is required");
+    }
+    if (typeof password !== "string" || password.length < 10) {
+        errors.push("The password must be at least 10 characters");
+    }
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+
+    try {
+        // Scramble the password. Only the scrambled version is ever saved.
+        const hash = await bcrypt.hash(password, 12);
+
+        // The role is set HERE, never taken from the request, so nobody can register themselves as an admin.
+        const result = await pool.query(
+            "INSERT INTO users (email, password_hash, role) VALUES ($1, $2, 'customer') RETURNING id, email, role",
+            [email.trim().toLowerCase(), hash]
+        );
+        const user = result.rows[0];
+
+        // Log them in straight away, with the same kind of token as the login route.
+        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "8h" });
+        res.status(201).json({ token, role: user.role, email: user.email });
+    } catch (error) {
+        // 23505 means an account with this email already exists (the email column is UNIQUE).
+        if (error.code === "23505") {
+            return res.status(409).json({ errors: ["An account with that email already exists"] });
+        }
+        console.log(error);
+        res.status(500).json({ message: "Could not create the account" });
+    }
+});
+
+// POST /auth/change-password: a logged-in user changes their own password. The current password must be right.
+app.post("/auth/change-password", requireAuth, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+        return res.status(400).json({ errors: ["Both passwords are required"] });
+    }
+    if (newPassword.length < 10) {
+        return res.status(400).json({ errors: ["The new password must be at least 10 characters"] });
+    }
+    if (newPassword === currentPassword) {
+        return res.status(400).json({ errors: ["The new password must be different from the current one"] });
+    }
+
+    try {
+        // Find the stored hash for the person in the token.
+        const result = await pool.query("SELECT password_hash FROM users WHERE id = $1", [req.user.id]);
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(401).json({ message: "Please log in again" });
+        }
+
+        // Check the current password against the stored hash.
+        const matches = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!matches) {
+            return res.status(400).json({ errors: ["The current password is incorrect"] });
+        }
+
+        // Save the hash of the new one.
+        const newHash = await bcrypt.hash(newPassword, 12);
+        await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [newHash, req.user.id]);
+
+        res.json({ message: "Password changed" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Could not change the password" });
     }
 });
 

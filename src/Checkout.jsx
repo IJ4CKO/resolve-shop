@@ -10,7 +10,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function Checkout(props) {
     const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(props.auth ? props.auth.email : "");
     const [address, setAddress] = useState("");
     const [busy, setBusy] = useState(false);            // true while the order is being sent
     const [errors, setErrors] = useState([]);           // messages from the backend, if it refuses
@@ -26,7 +26,11 @@ function Checkout(props) {
 
         fetch(API_URL + "/orders", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                    "Content-Type": "application/json",
+                    // If someone is logged in, send their token so the order is linked to their account.
+                    ...(props.auth ? { Authorization: "Bearer " + props.auth.token } : {})
+            },
             body: JSON.stringify({
                 name: name,
                 email: email,
