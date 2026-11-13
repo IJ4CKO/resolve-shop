@@ -6,7 +6,7 @@ A clothing e-commerce shop. Customers browse, search and filter products, add th
 
 ## Run it locally
 
-You need Node 18+ and a Postgres database (Neon works).
+A Postgres database (Neon works).
 
 **Backend** (`backend/`)
 1. `cd backend && npm install`
@@ -72,6 +72,3 @@ Test card: `4242 4242 4242 4242`, any future date, any 3 digits. Test mode only:
 2. In Render: deploy the **backend** first, then the **website** (auto-deploy is off).
 3. Test live: browse, search, buy with the test card, confirm the order turns `paid`.
 
-## Checklist against the brief
-
-Admin login, role-based access, product and inventory management, PostgreSQL storage, product CRUD, colours and variants, search/filter/sort, server-side pricing, availability validation, order references and statuses, duplicate-submission prevention, Stripe payments, customer order history: all implemented.
