@@ -1,45 +1,77 @@
 # RESOLVE
 
-RESOLVE is a clothing shop I built as a full-stack project: a React website, a Node backend and a PostgreSQL database, all hosted online.
+A clothing e-commerce shop. Customers browse, search and filter products, add them to a basket and pay by card (Stripe, test mode). Admins manage products, stock and orders.
 
-**Live site:** https://resolve-shop.onrender.com
+**Stack:** React + Vite (website), Node + Express (backend), PostgreSQL on Neon (database), Stripe embedded Checkout (payments), Render (hosting).
 
-## What it does
-- Browse six categories: T-Shirts, Hoodies, Jeans, Joggers, Quarter Zips and Polo Shirts
-- Pick a size, add items to a basket, change quantities and remove items
-- Check out with a name, email and delivery address
-- Orders are saved in a database
-- A password-protected admin page at `/orders` shows the saved orders
-- Works on desktop and mobile
+## Run it locally
 
-## How it's built
-- **Website:** React and Vite, hosted on Render as a static site
-- **Backend:** Node and Express, hosted on Render as a web service
-- **Database:** PostgreSQL, hosted on Neon
-- **Code:** stored on GitHub, and Render rebuilds the site when I push
+You need Node 18+ and a Postgres database (Neon works).
 
-## How it works
-When a customer presses **Place order**, the website packs the checkout details and the basket into JSON and sends them to the backend with `fetch`. The backend receives them at `POST /orders` and saves them in the `orders` table in Neon. The admin page asks the backend for the orders with a password header, and the backend only replies if the password matches a secret stored on the server.
+**Backend** (`backend/`)
+1. `cd backend && npm install`
+2. Copy `.env.example` to `.env` and fill in every value (see Settings).
+3. Create the tables: run `schema.sql` against a new, empty database (it is for first-time setup only).
+4. Add the products: `node seed.js`
+5. Create an admin: set `NEW_ADMIN_EMAIL` and `NEW_ADMIN_PASSWORD` (at least 12 characters) in your terminal only, then run `node create-admin.js`. Never put the password in a file or in chat.
+6. Start: `node index.js` (runs on port 3001).
 
-More detail on each file is in [how-it-works.md](how-it-works.md).
+**Website** (project root)
+1. `npm install`
+2. Copy `.env.example` to `.env` and fill in both values.
+3. `npm run dev`
 
-## Running it on your own computer
-1. Install the website's packages and start it:
+**Payments locally:** Stripe cannot reach your laptop, so run the Stripe CLI in a separate window:
+`stripe listen --forward-to localhost:3001/stripe/webhook`
+It prints a `whsec_...` value. Put that in the backend `.env` as `STRIPE_WEBHOOK_SECRET` and restart the backend.
+
+## Settings
+
+| Where | Setting | What it is |
+|---|---|---|
+| backend/.env | `DATABASE_URL` | Neon connection string |
+| backend/.env | `JWT_SECRET` | Long random text used to sign login tokens |
+| backend/.env | `STRIPE_SECRET_KEY` | Stripe test secret key (`sk_test_...`) |
+| backend/.env | `STRIPE_WEBHOOK_SECRET` | Signing secret for the webhook (`whsec_...`) |
+| backend/.env | `FRONTEND_URL` | Website address, used for Stripe return links |
+| backend/.env | `PORT` | Optional. Render sets it; defaults to 3001 |
+| root .env | `VITE_API_URL` | Backend address |
+| root .env | `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe test publishable key (`pk_test_...`) |
+
+To make a `JWT_SECRET`, run this and paste the result in:
+
 ```
-npm install
-npm run dev
+node -e "console.log(crypto.randomBytes(48).toString('hex'))"
 ```
-2. Create a `.env` file in the top folder containing `VITE_API_URL` (the backend's address).
-3. In a second terminal, start the backend:
-```
-cd backend
-npm install
-node index.js
-```
-4. Create a `.env` file in the `backend` folder containing `DATABASE_URL` (a PostgreSQL connection string) and `ADMIN_PASSWORD`.
 
-The `.env` files are not included in the repository, because they hold secrets.
+`.env` files are git-ignored. Only the `.env.example` files (placeholders) are committed. On Render the same settings are entered in each service's Environment page.
 
-## Notes
-- This is a demo shop. No payment is taken, so please don't enter real details at checkout.
-- The backend is on a free plan, so it sleeps when idle and the first request can take up to a minute.
+## Roles
+
+- **Visitor:** browse, search, buy as a guest.
+- **Customer:** registered account. Orders are linked to the account; can see "My orders" and change password.
+- **Admin:** everything above plus the Admin page (products, variants, stock, hide/show, all orders). Roles are set by the server only; registering always creates a customer.
+
+## How a payment works
+
+1. Checkout sends the basket (variant ids and quantities only) to `POST /orders`.
+2. The server looks up real prices and stock, saves a **pending** order, takes stock off, and creates a Stripe Checkout Session.
+3. The website shows Stripe's embedded card form using the returned `clientSecret`.
+4. Stripe calls `POST /stripe/webhook`. `checkout.session.completed` marks the order **paid**; `checkout.session.expired` (30 minutes unpaid) marks it **cancelled** and returns the stock.
+5. A repeated submit with the same idempotency key returns the existing order instead of creating another.
+
+Test card: `4242 4242 4242 4242`, any future date, any 3 digits. Test mode only: no real money moves.
+
+## Search
+
+`GET /products` accepts `search`, `category`, `colour`, `minPrice`, `maxPrice`, `inStock` and `sort` (`price_asc`, `price_desc`, `name_asc`). Sorting uses a whitelist, and all values go in as SQL parameters.
+
+## Releasing a change
+
+1. Work on a branch, open a pull request, merge.
+2. In Render: deploy the **backend** first, then the **website** (auto-deploy is off).
+3. Test live: browse, search, buy with the test card, confirm the order turns `paid`.
+
+## Checklist against the brief
+
+Admin login, role-based access, product and inventory management, PostgreSQL storage, product CRUD, colours and variants, search/filter/sort, server-side pricing, availability validation, order references and statuses, duplicate-submission prevention, Stripe payments, customer order history: all implemented.
